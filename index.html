@@ -368,15 +368,21 @@ async function _extractPdfText(file){
   var pdf=await window.pdfjsLib.getDocument({data:bytes}).promise;
   var pages=[];
   for(var p=1;p<=pdf.numPages;p++){
-    var page=await pdf.getPage(p),content=await page.getTextContent(),rows=[],lastY=null,line=[];
-    content.items.forEach(function(item){
-      var y=item.transform&&item.transform.length>5?Math.round(item.transform[5]):lastY;
-      if(lastY!==null&&y!==lastY&&line.length){rows.push(line.join(' '));line=[];}
-      if(item.str)line.push(item.str);
-      if(item.hasEOL&&line.length){rows.push(line.join(' '));line=[];}
-      lastY=y;
+    var page=await pdf.getPage(p),content=await page.getTextContent();
+    // PDF content-stream order need not match the visible table order.
+    var bands=[];
+    content.items.filter(function(item){return item.str&&item.str.trim();})
+      .sort(function(a,b){return b.transform[5]-a.transform[5]||a.transform[4]-b.transform[4];})
+      .forEach(function(item){
+        var y=item.transform[5];
+        var band=bands.find(function(row){return Math.abs(row.y-y)<=3;});
+        if(!band){band={y:y,items:[]};bands.push(band);}
+        band.items.push(item);
+      });
+    var rows=bands.map(function(band){
+      return band.items.sort(function(a,b){return a.transform[4]-b.transform[4];})
+        .map(function(item){return item.str;}).join(' ');
     });
-    if(line.length)rows.push(line.join(' '));
     pages.push(rows.join('\n'));
   }
   return pages.join('\n');
@@ -386,31 +392,58 @@ function _cleanPdfValue(value){
   return String(value||'').replace(/\s+/g,' ').replace(/^[\s:;,.\-–—]+|[\s;]+$/g,'').trim();
 }
 
+// Labels are anchored: prose such as "fornito dal richiedente" is not a field.
+var _practiceLabels="(?:codice\\s+pratica|pratica\\s*(?:id|n(?:\\.|°)?)|id\\s+pratica|denominazione(?:\\s+richiedente)?|richiedente|istante|protocollo\\s+suap|prot\\.?\\s*suap|ubicazione|luogo\\s+dell['’]?occupazione|indirizzo\\s+dell['’]?occupazione|data\\s*(?:/\\s*periodo)?\\s+occupazione|periodo\\s+(?:di\\s+)?occupazione)";
 function _pdfLabeledValue(text,label){
   var lines=String(text||'').replace(/\r/g,'\n').split(/\n+/).map(_cleanPdfValue).filter(Boolean);
-  var nextLabel=/(?:pratica\s*(?:id|n(?:\.|°)?)|id\s+pratica|richiedente|istante|protocollo\s*(?:suap)?|prot\.?\s*suap|ubicazione|luogo\s+dell['’]?occupazione|indirizzo\s+dell['’]?occupazione|data\s*(?:\/\s*periodo)?\s+occupazione|periodo\s+(?:di\s+)?occupazione)\s*:/i;
+  var nextLabel=new RegExp('(?:'+_practiceLabels+'|codice\\s+fiscale|domicilio\\s+elettronico[^:]*|qualifica|sede\\s+legale[^:]*)\\s*:','i');
   for(var i=0;i<lines.length;i++){
     var m=lines[i].match(label);
     if(!m)continue;
-    var value=_cleanPdfValue(lines[i].slice((m.index||0)+m[0].length));
-    if(value){
-      var cut=value.search(nextLabel);
-      if(cut>0)value=value.slice(0,cut);
-      return _cleanPdfValue(value);
-    }
-    if(i+1<lines.length&&!nextLabel.test(lines[i+1]))return _cleanPdfValue(lines[i+1]);
+    var value=_cleanPdfValue(lines[i].slice(m[0].length));
+    if(!value&&i+1<lines.length&&!nextLabel.test(lines[i+1])&&!/^\d+\s*[-–]/.test(lines[i+1]))value=lines[i+1];
+    var cut=value.search(nextLabel);
+    if(cut>=0)value=value.slice(0,cut);
+    if(value)return _cleanPdfValue(value);
   }
   return '';
 }
 
 function _extractPracticeData(text){
+  // This PEC PDF encodes the 'ti' ligature as U+019F, sometimes split
+  // into separate PDF.js text items. Normalize the known label only.
+  text=String(text||'').replace(/pra\s*(?:Ɵ|\(cid:415\))\s*ca/gi,'pratica');
+  text=text.replace(/\b([A-Z0-9]{11,16})\s*-\s*(\d{8})\s*-\s*(\d{3,5})\b/gi,'$1-$2-$3');
   var ex={
-    praticaId:_pdfLabeledValue(text,/(?:pratica\s*(?:id|n(?:\.|°)?)|id\s+pratica)\s*[:\-]?/i),
-    richiedente:_pdfLabeledValue(text,/(?:richiedente|istante|denominazione\s+richiedente)\s*[:\-]?/i),
-    ubicazione:_pdfLabeledValue(text,/(?:ubicazione|luogo\s+dell['’]?occupazione|indirizzo\s+dell['’]?occupazione)\s*[:\-]?/i),
-    dataOccupazione:_pdfLabeledValue(text,/(?:data\s*(?:\/\s*periodo)?\s+occupazione|periodo\s+(?:di\s+)?occupazione)\s*[:\-]?/i),
-    protocollo:_pdfLabeledValue(text,/(?:protocollo\s+suap|prot\.?\s*suap)\s*[:\-]?/i)
+    praticaId:_pdfLabeledValue(text,/^(?:codice\s+pratica|pratica\s*(?:id|n(?:\.|°)?)|id\s+pratica)\s*[:\-]?/i),
+    richiedente:_pdfLabeledValue(text,/^(?:denominazione\s+richiedente|richiedente|istante)\s*[:\-]?/i),
+    ubicazione:_pdfLabeledValue(text,/^(?:ubicazione|luogo\s+dell['’]?occupazione|indirizzo\s+dell['’]?occupazione)\s*[:\-]?/i),
+    dataOccupazione:_pdfLabeledValue(text,/^(?:data\s*(?:\/\s*periodo)?\s+occupazione|periodo\s+(?:di\s+)?occupazione)\s*[:\-]?/i),
+    protocollo:_pdfLabeledValue(text,/^(?:protocollo\s+suap|prot\.?\s*suap)\s*[:\-]?/i)
   };
+  // PEC transmission: never confuse the practice protocol with the
+  // communication protocol or the Business Register protocol.
+  if(!ex.praticaId)ex.praticaId=_pdfLabeledValue(text,/^pratica\s*:/i);
+  if(!ex.richiedente){
+    var business=text.match(/(?:^|\n)Impresa\s*:\s*([\s\S]*?)(?=\s*Protocollo\s+(?:Registro\s+Imprese|pratica|della\s+comunicazione)\s*:|\n\s*\n|$)/i);
+    if(business)ex.richiedente=_cleanPdfValue(business[1].replace(/^\s*[A-Z0-9]{11,16}\s*[-–]\s*/i,''));
+  }
+  if(!ex.protocollo){
+    var practiceProtocol=text.match(/(?:^|\n)Protocollo\s+pratica\s*:\s*([^\n]*)(?:\n(?!\s*(?:Protocollo|Adempimenti)\b)([^\n]+))?/i);
+    if(practiceProtocol){
+      var protocol=practiceProtocol[1].trim()||practiceProtocol[2]||'';
+      ex.protocollo=_cleanPdfValue(protocol.split(/Protocollo\s+(?:della\s+comunicazione|Registro\s+Imprese)\s*:/i)[0])
+        .replace(/(\d)\s*[-–]\s*(?=\d)/g,'$1-');
+    }
+  }
+  // Scope the business name and location to their own receipt sections.
+  var impresa=String(text||'').match(/(?:^|\n)3\s*[-–]\s*Impresa o soggetto economico\s*\n([\s\S]*?)(?=\n4\s*[-–]|$)/i);
+  if(!ex.richiedente&&impresa)ex.richiedente=_pdfLabeledValue(impresa[1],/^Denominazione\s*:/i);
+  var impianto=String(text||'').match(/(?:^|\n)5\s*[-–]\s*Indirizzo dell['’]impianto\s*\n([\s\S]*?)(?=\n(?:www\.|6\s*[-–])|$)/i);
+  if(!ex.ubicazione&&impianto){
+    var address=impianto[1].match(/via,\s*viale,([\s\S]*)/i);
+    if(address)ex.ubicazione=_cleanPdfValue(address[1].replace(/piazza\s*\.{0,3}\s*:/gi,'').replace(/\bn\.\s*/gi,' '));
+  }
   if(!ex.praticaId){var pratica=String(text||'').match(/\b[A-Z0-9]{11,16}-\d{8}-\d{3,5}\b/i);if(pratica)ex.praticaId=pratica[0];}
   if(_riferimentiSuapCoincidono(ex.praticaId,ex.protocollo))ex.protocollo='';
   return ex;
@@ -430,7 +463,7 @@ async function analizzaAI(){
       if(ex[pair[0]]){document.getElementById(pair[1]).value=ex[pair[0]];count++;}
     });
     syncProtSuapRef();updatePecFields(true);
-    if(count)mostraMsg('O','Dati individuati: '+count+'. Controlla sempre i campi, in particolare Pratica ID e Protocollo SUAP.');
+    if(count)mostraMsg('O','Dati individuati: '+count+'. Controlla sempre i campi, in particolare Pratica ID e Protocollo SUAP.'+(!ex.ubicazione?' Ubicazione non individuata nel documento.':'')+(!ex.dataOccupazione?' Periodo di occupazione non individuato: compilalo dal documento che lo riporta.':''));
     else mostraMsg('E','Il PDF è stato letto, ma i dati non sono stati riconosciuti. Compila i campi manualmente.');
   }catch(e){mostraMsg('E',e.message);}
   finally{btn.disabled=false;btn.textContent='Estrai i dati dal PDF';}
