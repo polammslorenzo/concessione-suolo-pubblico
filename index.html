@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pareri Suolo Pubblico v7.0 — U.O. San Lorenzo</title>
+<title>Pareri Suolo Pubblico v7.1 — U.O. San Lorenzo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -105,6 +105,25 @@ input:focus,select:focus,textarea:focus{border-color:#5b9cf6;box-shadow:0 0 0 3p
 .review-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:#cbd5e1}.review-row input{width:auto;min-height:0}
 .kbd-hint{font-size:11px;color:#64748b;margin:-12px 0 16px}
 @media(max-width:650px){.ess-bar{grid-template-columns:1fr}}
+/* v7.1: coda pratiche, testi standard, registro */
+.q-prog{height:6px;background:#1f2633;border-radius:4px;overflow:hidden;margin:-4px 0 12px}.q-prog div{height:100%;background:#22c55e;width:0;transition:width .3s}
+#queueList{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.q-row{display:flex;align-items:center;gap:10px;background:#1b202a;border:1px solid #2a3140;border-radius:10px;padding:8px 10px}
+.q-row.current{border-color:#3b82f6;background:#132037}
+.q-n{font-size:11px;color:#64748b;min-width:18px;text-align:right}
+.q-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.q-main b{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-main small{font-size:11px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.q-main em{color:#fca5a5;font-style:normal}
+.q-st{font-size:10px;font-weight:700;border-radius:6px;padding:3px 7px;white-space:nowrap;background:#273042;color:#cbd5e1}
+.q-st.pronta{background:#0f1e35;color:#93c5fd}.q-st.fatta{background:#0f2a1a;color:#86efac}.q-st.errore{background:#2a1a1a;color:#fca5a5}.q-st.saltata{background:#1f2430;color:#64748b}
+.q-act{display:flex;gap:5px}.q-act button{background:#1c2433;color:#cbd5e1;border:1px solid #334155;border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer;min-height:0}
+.lib-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.lib-bar select{flex:1;min-width:180px;width:auto}
+.lib-bar button{background:#1c1f28;color:#9ca3af;border:1px solid #2a2d38;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;min-height:0}
+.reg-card{width:min(1100px,100%)!important}.reg-count{font-size:11px;color:#7f8795;margin:8px 0}
+.reg-wrap{overflow:auto;max-height:55vh;border:1px solid #242833;border-radius:8px}
+.reg-table{border-collapse:collapse;width:100%;font-size:11px}.reg-table th{position:sticky;top:0;background:#1b202a;color:#9099aa;text-align:left;font-weight:600;padding:7px 8px;white-space:nowrap}
+.reg-table td{padding:6px 8px;border-top:1px solid #242833;color:#d1d5db;vertical-align:top;max-width:260px;overflow-wrap:anywhere}
+.reg-note{font-size:11px;color:#7f8795;margin-top:10px;line-height:1.5}
+@media(max-width:650px){.q-row{flex-wrap:wrap}.q-act{width:100%;justify-content:flex-end}.q-main small{white-space:normal}}
 /* Editor Word — stesso aspetto di Amministrativa 3.0 */
 .a3-review-overlay{position:fixed;inset:0;z-index:100000;background:rgba(5,10,20,.92);display:flex;align-items:center;justify-content:center;padding:12px;font-family:Arial,sans-serif;color:#e9eff8}
 .a3-review-dialog{width:min(960px,100%);height:min(94vh,100%);background:#141b28;border:1px solid #43536c;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 70px #000a}
@@ -131,15 +150,15 @@ input:focus,select:focus,textarea:focus{border-color:#5b9cf6;box-shadow:0 0 0 3p
     <div class="icon">&#128205;</div>
     <div>
       <div style="font-size:16px;font-weight:600">Pareri Occupazione Suolo Pubblico &nbsp;<span class="badge">U.O. SAN LORENZO</span></div>
-      <div style="font-size:12px;color:#6b7280;margin-top:2px">Amministrativa 2.0 — v7.0</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:2px">Amministrativa 2.0 — v7.1</div>
     </div>
   </div>
   <div id="msg" class="msg"></div>
 
   <!-- VERSIONE PUBBLICA GITHUB: estrazione PDF locale, nessuna chiave privata incorporata -->
   <div class="sec"><div class="sh">Carica il PDF della pratica</div>
-    <div id="dz" class="drop">&#128196; Trascina qui il PDF oppure clicca per selezionarlo</div>
-    <input type="file" id="fi" accept=".pdf" style="display:none">
+    <div id="dz" class="drop">&#128196; Trascina qui il PDF oppure clicca per selezionarlo<br><span style="font-size:11px;color:#64748b">Puoi trascinarne anche molti insieme: si crea la coda delle pratiche</span></div>
+    <input type="file" id="fi" accept=".pdf,application/pdf" multiple style="display:none">
     <div style="font-size:11px;color:#94a3b8;line-height:1.55;margin-top:9px">Il documento viene letto soltanto nel browser e non viene inviato all'esterno. Dopo l'estrazione controlla sempre Pratica ID e Protocollo SUAP.</div>
     <button type="button" id="bAI" class="bman" onclick="analizzaAI()">Estrai i dati dal PDF</button>
     <div class="f" style="margin-top:14px"><label>Testo della comunicazione (facoltativo)</label><textarea id="mailText" rows="5" placeholder="Se il PDF è una scansione senza testo, incolla qui il testo della comunicazione e premi Estrai i dati"></textarea></div>
@@ -260,7 +279,7 @@ input:focus,select:focus,textarea:focus{border-color:#5b9cf6;box-shadow:0 0 0 3p
       <button class="bgen" id="bGenDocumento" onclick="generaDocumentoUnico()">Genera documento unico (Trasmissione + Parere)</button>
       <button class="breset" onclick="resetFormAfterGeneration()">Nuova pratica</button>
     </div>
-    <div class="kbd-hint">Scorciatoie: Ctrl+Invio genera il documento · Alt+N nuova pratica</div>
+    <div class="kbd-hint">Scorciatoie: Ctrl+Invio genera il documento · Alt+N nuova pratica (con la coda: prossima pratica)</div>
     <div id="pdfReadyBox" style="display:none;margin:0 0 18px;background:#0f2a1a;border:1px solid #166534;border-radius:12px;padding:14px 16px">
       <div style="font-size:13px;font-weight:700;color:#4ade80;margin-bottom:7px">✓ DOCUMENTO PRONTO</div>
       <div id="pdfReadyName" style="font-size:12px;color:#bbf7d0;margin-bottom:10px;word-break:break-all"></div>
@@ -291,10 +310,10 @@ var TPL_LABELS = {
 };
 
 document.getElementById('dz').onclick=function(){document.getElementById('fi').click();};
-document.getElementById('fi').onchange=function(e){if(e.target.files[0])setPDF(e.target.files[0]);};
+document.getElementById('fi').onchange=function(e){handlePdfFiles(e.target.files);e.target.value='';};
 document.getElementById('dz').ondragover=function(e){e.preventDefault();this.style.borderColor='#a78bfa';};
 document.getElementById('dz').ondragleave=function(){this.style.borderColor='#2a2d38';};
-document.getElementById('dz').ondrop=function(e){e.preventDefault();this.style.borderColor='#2a2d38';var f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')setPDF(f);};
+document.getElementById('dz').ondrop=function(e){e.preventDefault();this.style.borderColor='#2a2d38';handlePdfFiles(e.dataTransfer.files);};
 
 (function(){
   var n=new Date(),d=n.getDate().toString().padStart(2,'0'),m=(n.getMonth()+1).toString().padStart(2,'0'),y=n.getFullYear().toString().slice(-2);
@@ -310,7 +329,7 @@ function setPDF(f){
   var r=new FileReader();
   r.onload=function(){
     pdfB64=r.result.split(',')[1];
-    document.getElementById('dz').innerHTML='&#128196; <span style="color:#4ade80">'+xe(f.name)+'</span> caricato — premi “Estrai i dati dal PDF”';
+    document.getElementById('dz').innerHTML='&#128196; <span style="color:#4ade80">'+xe(f.name)+'</span> caricato';
   };
   r.readAsDataURL(f);
 }
@@ -564,31 +583,45 @@ function updateEssentialsBar(){
   checkDuplicatePractice();
 }
 
+// Lettura di una pratica: testo del PDF (o OCR se è una scansione) + testo incollato.
+async function _readPractice(file,mail,onProgress){
+  var text=mail||'',ocr=false;
+  if(file){
+    var t=await _extractPdfText(file);
+    if(t.replace(/\s/g,'').length<20){t=await _ocrPdfText(file,onProgress);ocr=true;}
+    text=t+(mail?'\n'+mail:'');
+  }
+  if(text.replace(/\s/g,'').length<20)throw new Error('Nel documento non c’è testo leggibile, nemmeno con il riconoscimento ottico. Incolla il testo della comunicazione nel riquadro oppure compila i campi manualmente.');
+  var ex=_extractPracticeData(text);
+  // I tre dati essenziali: se la lettura per etichetta fallisce, si usano le ricerche di riserva.
+  var cand=_essentialCandidates(text,file&&file.name);
+  ESSENTIALS.forEach(function(e){if(!ex[e[0]]&&cand[e[0]].length)ex[e[0]]=cand[e[0]][0];});
+  if(_riferimentiSuapCoincidono(ex.praticaId,ex.protocollo))ex.protocollo='';
+  return {text:text,ex:ex,cand:cand,ocr:ocr};
+}
+var PRACTICE_FIELDS=[['protocollo','protocollo','Protocollo SUAP'],['praticaId','praticaId','ID pratica'],['richiedente','richiedente','Utente'],['ubicazione','ubicazione','Ubicazione'],['dataOccupazione','dataOcc','Data occupazione']];
+function _practiceMissing(ex){return PRACTICE_FIELDS.filter(function(f){return !ex[f[0]];}).map(function(f){return f[2];});}
+function _applyPractice(r){
+  var count=0;
+  PRACTICE_FIELDS.forEach(function(f){if(r.ex[f[0]]){document.getElementById(f[1]).value=r.ex[f[0]];count++;}});
+  ESSENTIALS.forEach(function(e){renderCandidates(e[0],r.cand[e[0]]);});
+  syncProtSuapRef();updatePecFields(true);updateEssentialsBar();suggestTemplate(r.text);
+  if(typeof saveDraft==='function')saveDraft(false);
+  return count;
+}
+function _practiceMessage(r,count){
+  var missing=_practiceMissing(r.ex),ocr=r.ocr?'Testo ricavato con il riconoscimento ottico della scansione: controlla con più attenzione. ':'';
+  if(!count){mostraMsg('E',ocr+'Il documento è stato letto, ma i dati non sono stati riconosciuti. Compila i campi manualmente.');return;}
+  mostraMsg(missing.length||r.ocr?'E':'O',ocr+'Dati individuati: '+count+'. '+(missing.length?'Da completare: '+missing.join(', ')+'. ':'')+'Controlla sempre i valori prima di generare il documento.');
+}
 async function analizzaAI(){
   var mail=document.getElementById('mailText').value.trim();
   if(!pdfFile&&!mail){mostraMsg('E','Carica il PDF della pratica oppure incolla il testo della comunicazione.');return;}
   var btn=document.getElementById('bAI');btn.disabled=true;btn.textContent='Estrazione in corso...';
   mostraMsg('L','Lettura locale della pratica...');
   try{
-    var text=mail;
-    if(pdfFile)text=(await _extractPdfText(pdfFile))+(mail?'\n'+mail:'');
-    if(text.replace(/\s/g,'').length<20)throw new Error('Il PDF sembra una scansione senza testo. Incolla il testo della comunicazione nel riquadro oppure compila i campi manualmente.');
-    var ex=_extractPracticeData(text),count=0;
-    // I tre dati essenziali: se la lettura per etichetta fallisce, si usano le ricerche di riserva.
-    var cand=_essentialCandidates(text,pdfFile&&pdfFile.name);
-    ESSENTIALS.forEach(function(e){if(!ex[e[0]]&&cand[e[0]].length)ex[e[0]]=cand[e[0]][0];});
-    if(_riferimentiSuapCoincidono(ex.praticaId,ex.protocollo))ex.protocollo='';
-    [['praticaId','praticaId'],['richiedente','richiedente'],['ubicazione','ubicazione'],['dataOccupazione','dataOcc'],['protocollo','protocollo']].forEach(function(pair){
-      if(ex[pair[0]]){document.getElementById(pair[1]).value=ex[pair[0]];count++;}
-    });
-    ESSENTIALS.forEach(function(e){renderCandidates(e[0],cand[e[0]]);});
-    syncProtSuapRef();updatePecFields(true);updateEssentialsBar();suggestTemplate(text);
-    if(typeof saveDraft==='function')saveDraft(false);
-    if(count){
-      var missing=[['protocollo','Protocollo SUAP'],['praticaId','ID pratica'],['richiedente','Utente'],['ubicazione','Ubicazione'],['dataOccupazione','Data occupazione']].filter(function(pair){return !ex[pair[0]];}).map(function(pair){return pair[1];});
-      mostraMsg(missing.length?'E':'O','Dati individuati: '+count+'. '+(missing.length?'Da completare: '+missing.join(', ')+'. ':'')+'Controlla sempre i valori prima di generare il documento.');
-    }
-    else mostraMsg('E','Il PDF è stato letto, ma i dati non sono stati riconosciuti. Compila i campi manualmente.');
+    var r=await _readPractice(pdfFile,mail,function(t){mostraMsg('L',t);});
+    _practiceMessage(r,_applyPractice(r));
   }catch(e){mostraMsg('E',e.message);}
   finally{btn.disabled=false;btn.textContent='Estrai i dati dal PDF';}
 }
@@ -766,7 +799,7 @@ function resetFormAfterGeneration(){
     if(letteraOn){ letteraOn=false; var tog=document.getElementById('togL'),knob=document.getElementById('knobL'),sec=document.getElementById('letteraSec'); if(tog)tog.style.background='#2a2d38'; if(knob){knob.style.background='#6b7280';knob.style.left='3px';} if(sec)sec.style.display='none'; }
     var aiBox=document.getElementById('aiBox'); if(aiBox) aiBox.style.display='none';
     pdfB64=null; pdfFile=null; aiSugg=null;
-    var dz=document.getElementById('dz'); if(dz)dz.innerHTML='&#128196; Trascina qui il PDF oppure clicca per selezionarlo';
+    var dz=document.getElementById('dz'); if(dz)dz.innerHTML='&#128196; Trascina qui il PDF oppure clicca per selezionarlo<br><span style="font-size:11px;color:#64748b">Puoi trascinarne anche molti insieme: si crea la coda delle pratiche</span>';
     clearDraft();
     syncProtSuapRef();
     window.scrollTo({top:0,behavior:'smooth'});
@@ -774,7 +807,7 @@ function resetFormAfterGeneration(){
 }
 
 // ===== Migliorie operative v2.1 =====
-var APP_VERSION='7.0 - dati essenziali garantiti, editor Word, file con PG';
+var APP_VERSION='7.1 - coda pratiche, Word unico, testi standard, registro, OCR';
 var MAX_FILE_MB=12;
 function protocolYear(){var e=document.getElementById('annoProt');return e&&/^\d{4}$/.test(e.value)?e.value:String(new Date().getFullYear());}
 function formatDateExt(d){var m=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];return d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();}
@@ -784,7 +817,7 @@ function initOperationalEnhancements(){
   ['dataR','dataAcc'].forEach(function(id){var e=document.getElementById(id);if(e&&!e.value){var n=new Date();e.value=String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+String(n.getFullYear()).slice(-2);}});
   var o=document.getElementById('ora');if(o&&!o.value){var n=new Date();o.value=String(n.getHours()).padStart(2,'0')+'.'+String(n.getMinutes()).padStart(2,'0');}
   ['dataNap','dataN'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=formatDateExt(new Date());});
-  var form=document.getElementById('form');if(form&&!document.getElementById('draftTools')){var t=document.createElement('div');t.id='draftTools';t.className='toolbar';t.innerHTML='<button type="button" class="bsmall" onclick="saveDraft(true)">Salva bozza</button><button type="button" class="bsmall" onclick="loadDraft(true)">Riprendi bozza</button><button type="button" class="bsmall" onclick="showPreview()">Anteprima</button><button type="button" class="bsmall" onclick="exportRegistryCSV()">Esporta registro CSV</button><button type="button" class="bsmall" onclick="clearDraft()">Cancella bozza</button>';form.insertBefore(t,form.firstChild);}
+  var form=document.getElementById('form');if(form&&!document.getElementById('draftTools')){var t=document.createElement('div');t.id='draftTools';t.className='toolbar';t.innerHTML='<button type="button" class="bsmall" onclick="saveDraft(true)">Salva bozza</button><button type="button" class="bsmall" onclick="loadDraft(true)">Riprendi bozza</button><button type="button" class="bsmall" onclick="showPreview()">Anteprima</button><button type="button" class="bsmall" onclick="openRegistry()">Registro pratiche</button><button type="button" class="bsmall" onclick="clearDraft()">Cancella bozza</button>';form.insertBefore(t,form.firstChild);}
   document.querySelectorAll('input,select,textarea').forEach(function(e){e.addEventListener('input',function(){e.classList.remove('invalid');saveDraft(false);});e.addEventListener('change',function(){saveDraft(false);});});
   loadDraft(false);
   if(typeof sincronizzaFirmatario==='function')sincronizzaFirmatario('qualifica');
@@ -806,7 +839,7 @@ function showPreview(){ensurePreviewDialog();var rows=collectFormSummary();var b
 function closePreview(){var x=document.getElementById('previewOverlay');if(x)x.style.display='none';}
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function registryKey(){return 'amm20_registry_v1';}
-function recordPracticeFromForm(){try{var rows=collectFormSummary(),obj={timestamp:new Date().toISOString(),app:document.title};rows.forEach(function(r){obj[r[0]]=r[1];});obj.File=(typeof _lastPdfFilename==='string'?_lastPdfFilename:'');if(typeof _rememberRecorded==='function')_rememberRecorded();var a=JSON.parse(localStorage.getItem(registryKey())||'[]');a.unshift(obj);if(a.length>500)a=a.slice(0,500);localStorage.setItem(registryKey(),JSON.stringify(a));}catch(e){}}
+function recordPracticeFromForm(){try{var rows=collectFormSummary(),obj={timestamp:new Date().toISOString(),app:document.title};rows.forEach(function(r){if(!/PEC/.test(r[0]))obj[r[0]]=r[1];});var tp=document.getElementById('tpl');if(tp&&typeof TPL_LABELS!=='undefined')obj['Tipo parere']=TPL_LABELS[tp.value]||tp.value;obj.File=(typeof _lastPdfFilename==='string'?_lastPdfFilename:'');if(typeof _rememberRecorded==='function')_rememberRecorded();var a=JSON.parse(localStorage.getItem(registryKey())||'[]');a.unshift(obj);if(a.length>3000)a=a.slice(0,3000);localStorage.setItem(registryKey(),JSON.stringify(a));}catch(e){}}
 function exportRegistryCSV(){var a=[];try{a=JSON.parse(localStorage.getItem(registryKey())||'[]');}catch(e){}if(!a.length){if(typeof mostraMsg==='function')mostraMsg('E','Il registro è vuoto');return;}var keys=[];a.forEach(function(o){Object.keys(o).forEach(function(k){if(keys.indexOf(k)<0)keys.push(k);});});var esc=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';};var csv='\ufeff'+keys.map(esc).join(';')+'\n'+a.map(function(o){return keys.map(function(k){return esc(o[k]);}).join(';');}).join('\n');var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(blob),x=document.createElement('a');x.href=u;x.download='registro_pratiche_'+new Date().toISOString().slice(0,10)+'.csv';x.click();setTimeout(function(){URL.revokeObjectURL(u);},3000);}
 
 document.addEventListener('DOMContentLoaded',initOperationalEnhancements);
@@ -1240,7 +1273,32 @@ async function generaPdf(apriPec){
 }
 
 
+// Word unico vero: lettera e parere nascono dallo stesso modello (stessi stili, numerazioni,
+// intestazione e piè di pagina), quindi il corpo del parere si accoda a quello della lettera
+// dopo un'interruzione di pagina. Il file si apre identico in Word, LibreOffice e da telefono.
+async function _mergeDocxBodies(letterBlob,parereBlob){
+  var zl=await JSZip.loadAsync(letterBlob),zp=await JSZip.loadAsync(parereBlob);
+  var xl=await zl.file('word/document.xml').async('string'),xp=await zp.file('word/document.xml').async('string');
+  var rootL=(xl.match(/<w:document\b[^>]*>/)||[''])[0],rootP=(xp.match(/<w:document\b[^>]*>/)||[''])[0];
+  var nsP=rootP.match(/xmlns:\w+="[^"]*"/g)||[];
+  if(!rootL||nsP.some(function(ns){return rootL.indexOf(ns)<0;}))return null;
+  var relsL=await zl.file('word/_rels/document.xml.rels').async('string'),relsP=await zp.file('word/_rels/document.xml.rels').async('string');
+  if(relsL!==relsP)return null;
+  var bodyP=(xp.match(/<w:body>([\s\S]*)<\/w:body>/)||[])[1];
+  if(!bodyP)return null;
+  bodyP=bodyP.replace(/<w:sectPr\b[\s\S]*?<\/w:sectPr>\s*$/,'').replace(/<w:bookmark(?:Start|End)\b[^>]*\/>/g,'');
+  var lastSect=xl.lastIndexOf('<w:sectPr');
+  if(lastSect<0||xl.indexOf('</w:body>',lastSect)<0)return null;
+  xl=xl.slice(0,lastSect)+'<w:p><w:r><w:br w:type="page"/></w:r></w:p>'+bodyP+xl.slice(lastSect);
+  zl.file('word/document.xml',xl);
+  // Il parere può aggiungere numerazioni proprie (Torronari): la sua numbering.xml contiene anche quelle della lettera.
+  var numP=zp.file('word/numbering.xml');if(numP)zl.file('word/numbering.xml',await numP.async('string'));
+  return await zl.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
 async function _buildCombinedDocxBlob(letterBlob,parereBlob){
+  var merged=await _mergeDocxBodies(letterBlob,parereBlob);
+  if(merged)return merged;
+  // Riserva per modelli con struttura diversa: parere incorporato (Word lo consolida all'apertura).
   var zip=await JSZip.loadAsync(letterBlob);
   var chunkPath='word/afchunk-parere.docx';
   zip.file(chunkPath,parereBlob);
@@ -1295,9 +1353,10 @@ async function generaDocumentoUnico(){
     }else{
       var combined=await _buildCombinedDocxBlob(letterBlob,parereBlob);
       _publishGeneratedBlob(combined,base+'.docx');
-      mostraMsg('O','Word unico pronto: trasmissione seguita dal parere. Al primo avvio Word può consolidare il secondo documento incorporato.');
+      mostraMsg('O','Word unico pronto: trasmissione seguita dal parere.');
     }
     if(typeof recordPracticeFromForm==='function')recordPracticeFromForm();
+    if(typeof onPracticeGenerated==='function')onPracticeGenerated();
   }catch(e){mostraMsg('E','Errore generazione documento: '+(e&&e.message?e.message:String(e)));}
   finally{if(btn)btn.disabled=false;}
 }
@@ -1638,11 +1697,278 @@ function initV7(){
   document.addEventListener('keydown',function(ev){
     if(window.DOCX_REVIEW&&window.DOCX_REVIEW.isOpen())return;
     if((ev.ctrlKey||ev.metaKey)&&ev.key==='Enter'){ev.preventDefault();var b=document.getElementById('bGenDocumento');if(b&&!b.disabled)generaDocumentoUnico();}
-    else if(ev.altKey&&!ev.ctrlKey&&(ev.key==='n'||ev.key==='N')){ev.preventDefault();if(confirm('Iniziare una nuova pratica? I dati della maschera verranno cancellati.'))resetFormAfterGeneration();}
+    else if(ev.altKey&&!ev.ctrlKey&&(ev.key==='n'||ev.key==='N'||ev.code==='KeyN')){
+      ev.preventDefault();
+      var inQueue=typeof QUEUE!=='undefined'&&QUEUE.length,cur=inQueue&&_queueItem(QUEUE_CURRENT);
+      if(inQueue){if(cur&&cur.status==='fatta'||confirm('Passare alla prossima pratica della coda? Le modifiche non generate andranno perse.'))nextQueueItem();}
+      else if(confirm('Iniziare una nuova pratica? I dati della maschera verranno cancellati.'))resetFormAfterGeneration();
+    }
   });
   updateEssentialsBar();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initV7);else initV7();
+</script>
+<script>
+// ===== v7.1: OCR delle scansioni, coda pratiche, testi standard, registro pratiche =====
+
+// ----- OCR nel browser (Tesseract, lingua italiana): parte solo se il PDF non ha testo -----
+var OCR_MAX_PAGES=6,_ocrWorkerPromise=null;
+function _loadScript(src){
+  return new Promise(function(resolve,reject){
+    var s=document.createElement('script');s.src=src;s.onload=resolve;
+    s.onerror=function(){reject(new Error('Impossibile caricare '+src+'. Controlla la connessione.'));};
+    document.head.appendChild(s);
+  });
+}
+function _ocrWorker(){
+  if(!_ocrWorkerPromise){
+    _ocrWorkerPromise=(async function(){
+      if(!window.Tesseract)await _loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+      return await window.Tesseract.createWorker('ita',1,{
+        workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',
+        corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1',
+        langPath:'https://cdn.jsdelivr.net/npm/@tesseract.js-data/ita@1.0.0/4.0.0_best_int'
+      });
+    })();
+    _ocrWorkerPromise.catch(function(){_ocrWorkerPromise=null;});
+  }
+  return _ocrWorkerPromise;
+}
+async function _ocrPdfText(file,onProgress){
+  var say=onProgress||function(){};
+  say('Il PDF è una scansione: avvio del riconoscimento ottico del testo (la prima volta scarica circa 6 MB)...');
+  var worker=await _ocrWorker();
+  if(!window.pdfjsLib)throw new Error('Il modulo di lettura PDF non è disponibile. Controlla la connessione e ricarica la pagina.');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  var n=Math.min(pdf.numPages,OCR_MAX_PAGES),out=[];
+  for(var p=1;p<=n;p++){
+    say('Riconoscimento ottico: pagina '+p+' di '+n+(pdf.numPages>n?' (lette solo le prime '+n+')':'')+'...');
+    var page=await pdf.getPage(p),vp=page.getViewport({scale:2.2});
+    var canvas=document.createElement('canvas');canvas.width=Math.ceil(vp.width);canvas.height=Math.ceil(vp.height);
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    var res=await worker.recognize(canvas);
+    out.push(res&&res.data?res.data.text:'');
+    canvas.width=canvas.height=0;
+  }
+  return out.join('\n');
+}
+
+// ----- Coda pratiche: tanti PDF trascinati insieme, lavorati uno dopo l'altro -----
+var QUEUE=[],QUEUE_CURRENT=null,_queueSeq=0,_queueReading=false;
+var QUEUE_STATES={attesa:'In attesa',lettura:'Lettura…',pronta:'Da lavorare',errore:'Da compilare a mano',fatta:'Fatta',saltata:'Saltata'};
+function handlePdfFiles(list){
+  var files=Array.from(list||[]).filter(function(f){return f&&(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name));});
+  if(!files.length){mostraMsg('E','Seleziona file PDF.');return;}
+  if(files.length===1&&!QUEUE.length){setPDF(files[0]);setTimeout(analizzaAI,0);return;}
+  var seen={};QUEUE.forEach(function(q){seen[q.file.name+'|'+q.file.size]=1;});
+  var added=0;
+  files.forEach(function(f){
+    if(!checkFileSize(f)||seen[f.name+'|'+f.size])return;
+    QUEUE.push({id:++_queueSeq,file:f,status:'attesa',r:null,err:'',out:''});added++;
+  });
+  renderQueue();
+  mostraMsg('O','Aggiunte alla coda '+added+' pratiche. Lettura in corso: puoi già aprire la prima.');
+  _readQueue();
+}
+async function _readQueue(){
+  if(_queueReading)return;_queueReading=true;
+  try{
+    for(var q;(q=QUEUE.find(function(x){return x.status==='attesa';}));){
+      q.status='lettura';renderQueue();
+      try{q.r=await _readPractice(q.file,'');q.status='pronta';}
+      catch(e){q.err=e.message;q.status='errore';}
+      renderQueue();
+      if(QUEUE_CURRENT===null&&!_v('protocollo')&&!_v('praticaId')&&!_v('pgR')&&q===QUEUE.find(function(x){return x.status==='pronta'||x.status==='errore';}))openQueueItem(q.id);
+    }
+  }finally{_queueReading=false;}
+}
+function _queueItem(id){return QUEUE.find(function(q){return q.id===id;});}
+function openQueueItem(id){
+  var q=_queueItem(id);if(!q||q.status==='attesa'||q.status==='lettura')return;
+  resetFormAfterGeneration();
+  QUEUE_CURRENT=id;pdfFile=q.file;
+  var dz=document.getElementById('dz');if(dz)dz.innerHTML='&#128196; <span style="color:#4ade80">'+xe(q.file.name)+'</span> — pratica '+(QUEUE.indexOf(q)+1)+' di '+QUEUE.length;
+  if(q.r)_practiceMessage(q.r,_applyPractice(q.r));
+  else mostraMsg('E',(q.err||'Dati non letti')+' — compila i campi a mano.');
+  renderQueue();
+  var pg=document.getElementById('pgR');if(pg){pg.scrollIntoView({behavior:'smooth',block:'center'});pg.focus();}
+}
+function nextQueueItem(){
+  var cur=_queueItem(QUEUE_CURRENT),start=cur?QUEUE.indexOf(cur)+1:0;
+  var order=QUEUE.slice(start).concat(QUEUE.slice(0,start));
+  var next=order.find(function(q){return (q.status==='pronta'||q.status==='errore')&&q.id!==QUEUE_CURRENT;});
+  if(next){openQueueItem(next.id);return true;}
+  if(QUEUE.some(function(q){return q.status==='attesa'||q.status==='lettura';})){mostraMsg('L','Le prossime pratiche sono ancora in lettura...');return true;}
+  if(QUEUE.length)mostraMsg('O','Coda completata: non ci sono altre pratiche da lavorare.');
+  return false;
+}
+function skipQueueItem(id){var q=_queueItem(id);if(!q)return;q.status='saltata';renderQueue();if(id===QUEUE_CURRENT)nextQueueItem();}
+function clearQueue(){
+  if(QUEUE.some(function(q){return q.status==='pronta'||q.status==='errore'||q.status==='attesa';})&&!confirm('Nella coda ci sono pratiche non ancora lavorate. Svuotarla comunque?'))return;
+  QUEUE=[];QUEUE_CURRENT=null;renderQueue();
+}
+function onPracticeGenerated(){
+  var q=_queueItem(QUEUE_CURRENT);
+  var box=document.getElementById('pdfReadyBox'),nb=document.getElementById('queueNextBtn');
+  if(!q){if(nb)nb.style.display='none';return;}
+  q.status='fatta';q.out=_lastPdfFilename;q.pg=_v('pgR');renderQueue();
+  var left=QUEUE.filter(function(x){return x.status!=='fatta'&&x.status!=='saltata';}).length;
+  if(box&&!nb){
+    nb=document.createElement('button');nb.type='button';nb.id='queueNextBtn';
+    nb.style.cssText='background:#2563eb;color:#fff;border:0;border-radius:9px;padding:10px 15px;font-size:13px;font-weight:700;cursor:pointer';
+    nb.onclick=nextQueueItem;
+    var row=box.querySelector('div[style*="flex"]');(row||box).appendChild(nb);
+  }
+  if(nb){nb.style.display=left?'inline-block':'none';nb.textContent='Prossima pratica ('+left+') →';}
+}
+function renderQueue(){
+  var sec=document.getElementById('queueSec');if(!sec)return;
+  if(!QUEUE.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  var done=QUEUE.filter(function(q){return q.status==='fatta';}).length;
+  document.getElementById('queueTitle').textContent='Coda pratiche — '+done+' fatte su '+QUEUE.length;
+  var bar=document.getElementById('queueBar');bar.style.width=Math.round(done*100/QUEUE.length)+'%';
+  var list=document.getElementById('queueList');list.innerHTML='';
+  QUEUE.forEach(function(q,i){
+    var ex=q.r?q.r.ex:{},row=document.createElement('div');
+    row.className='q-row'+(q.id===QUEUE_CURRENT?' current':'');
+    var miss=q.r?_practiceMissing(ex).filter(function(m){return /Protocollo|ID pratica|Utente/.test(m);}):[];
+    var info=q.status==='fatta'?(q.out||'documento generato'):q.status==='errore'?q.err:q.r?[ex.protocollo||'prot. SUAP ?',ex.richiedente||'utente ?',ex.ubicazione||''].filter(Boolean).join(' · '):'';
+    row.innerHTML='<span class="q-n">'+(i+1)+'</span><div class="q-main"><b>'+escapeHtml(q.file.name)+'</b><small>'+escapeHtml(info)+(miss.length?' — <em>mancano: '+escapeHtml(miss.join(', '))+'</em>':'')+(q.r&&q.r.ocr?' — <em>da scansione</em>':'')+'</small></div><span class="q-st '+q.status+'">'+QUEUE_STATES[q.status]+'</span>';
+    var actions=document.createElement('div');actions.className='q-act';
+    if(q.status!=='attesa'&&q.status!=='lettura'&&q.id!==QUEUE_CURRENT){var o=document.createElement('button');o.type='button';o.textContent=q.status==='fatta'?'Riapri':'Apri';o.onclick=function(){openQueueItem(q.id);};actions.appendChild(o);}
+    if(q.status==='pronta'||q.status==='errore'){var k=document.createElement('button');k.type='button';k.textContent='Salta';k.onclick=function(){skipQueueItem(q.id);};actions.appendChild(k);}
+    row.appendChild(actions);list.appendChild(row);
+  });
+}
+
+// ----- Testi standard: motivazioni e prescrizioni salvate, inseribili con un clic -----
+var LIB_KEY='amm20_suolo_testi_v1';
+var LIB_SEED={
+  motivazione:[{nome:'Lato dell’occupazione da tenere sgombro (art. 15 Reg. - art. 20 CdS)',testo:'si rileva che uno dei lati dell’occupazione dovrà essere mantenuto completamente sgombro da qualsiasi ostacolo, al fine di garantire il libero e sicuro transito pedonale ai sensi dell’art. 15 del Regolamento per l’occupazione di suolo pubblico (D.C.C. n. 71/2014) e dell’art. 20 del Codice della Strada.'}],
+  prescrizioni:[
+    {nome:'Mai sulla sede stradale',testo:'L’occupazione di suolo pubblico non dovrà mai interessare la sede stradale.'},
+    {nome:'Passaggio pedonale 1,20 m',testo:'Dovrà essere lasciato un passaggio pedonale di larghezza non inferiore a 1,20 m.'},
+    {nome:'Segnaletica stradale',testo:'L’occupazione richiesta non dovrà interferire e/o occultare la segnaletica stradale.'},
+    {nome:'Fascia libera 3,50 m per i mezzi di soccorso',testo:'Dovrà essere costantemente garantita una fascia libera di transito di larghezza non inferiore a m 3,50, idonea a consentire il passaggio dei mezzi di soccorso e di emergenza.'}
+  ]
+};
+var LIB_TARGETS=[['motivazione','motivazione'],['prescrizioni','prescrizioni'],['torAggiuntive','prescrizioni']];
+function libLoad(){
+  try{var x=JSON.parse(localStorage.getItem(LIB_KEY)||'null');if(x&&x.motivazione&&x.prescrizioni)return x;}catch(e){}
+  return JSON.parse(JSON.stringify(LIB_SEED));
+}
+function libSave(lib){try{localStorage.setItem(LIB_KEY,JSON.stringify(lib));}catch(e){mostraMsg('E','Impossibile salvare i testi standard su questo dispositivo.');}}
+function renderLibraries(){
+  var lib=libLoad();
+  LIB_TARGETS.forEach(function(t){
+    var ta=document.getElementById(t[0]);if(!ta)return;
+    var bar=document.getElementById('lib_'+t[0]);
+    if(!bar){bar=document.createElement('div');bar.id='lib_'+t[0];bar.className='lib-bar';ta.parentNode.insertBefore(bar,ta);}
+    bar.innerHTML='';
+    var sel=document.createElement('select');sel.setAttribute('aria-label','Testi standard');
+    sel.innerHTML='<option value="">Testi standard ('+lib[t[1]].length+')…</option>'+lib[t[1]].map(function(x,i){return '<option value="'+i+'">'+escapeHtml(x.nome)+'</option>';}).join('');
+    var ins=document.createElement('button');ins.type='button';ins.textContent='Inserisci';
+    ins.onclick=function(){
+      var x=lib[t[1]][sel.value];if(!x){sel.focus();return;}
+      ta.value=ta.value.trim()?ta.value.replace(/\s+$/,'')+'\n'+x.testo:x.testo;
+      ta.dispatchEvent(new Event('input',{bubbles:true}));sel.value='';
+    };
+    var save=document.createElement('button');save.type='button';save.textContent='Salva come standard';
+    save.onclick=function(){
+      var testo=ta.value.trim();if(!testo){mostraMsg('E','Scrivi prima il testo da salvare.');ta.focus();return;}
+      var cur=libLoad();
+      if(cur[t[1]].some(function(x){return x.testo===testo;})){mostraMsg('O','Questo testo è già tra quelli standard.');return;}
+      var nome=prompt('Nome breve per riconoscerlo nell’elenco:',testo.slice(0,60));if(nome===null)return;
+      cur[t[1]].push({nome:nome.trim()||testo.slice(0,60),testo:testo});libSave(cur);renderLibraries();
+      mostraMsg('O','Testo salvato tra gli standard.');
+    };
+    var del=document.createElement('button');del.type='button';del.textContent='Elimina';
+    del.onclick=function(){
+      var x=lib[t[1]][sel.value];if(!x){mostraMsg('E','Scegli dall’elenco il testo da eliminare.');sel.focus();return;}
+      if(!confirm('Eliminare il testo standard “'+x.nome+'”?'))return;
+      var cur=libLoad();cur[t[1]]=cur[t[1]].filter(function(y){return y.testo!==x.testo;});libSave(cur);renderLibraries();
+    };
+    bar.append(sel,ins,save,del);
+  });
+}
+
+// ----- Registro pratiche: ricerca, esportazione e unione con i registri dei colleghi -----
+function _registryAll(){var a=[];try{a=JSON.parse(localStorage.getItem(registryKey())||'[]');}catch(e){}return Array.isArray(a)?a:[];}
+function _isSuoloRecord(r){return r&&(r['Protocollo SUAP']!==undefined||/suolo/i.test(r.app||''));}
+var REG_COLS=[['timestamp','Data'],['PG Risposta','PG'],['Protocollo SUAP','Prot. SUAP'],['Pratica ID','ID pratica'],['Richiedente','Utente'],['Ubicazione','Ubicazione'],['Tipo parere','Parere'],['Estensore della nota','Estensore'],['File','File']];
+function _regCell(r,k){var v=r[k];if(k==='timestamp'&&v){var d=new Date(v);return isNaN(d)?v:d.toLocaleDateString('it-IT')+' '+d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});}return v==null?'':String(v);}
+function openRegistry(){
+  var ov=document.getElementById('regOverlay');
+  if(!ov){
+    ov=document.createElement('div');ov.id='regOverlay';ov.className='preview-overlay';
+    ov.innerHTML='<div class="preview-card reg-card"><div class="preview-head"><strong>Registro pratiche di suolo pubblico</strong><button type="button" onclick="closeRegistry()">×</button></div>'+
+      '<input id="regSearch" type="search" placeholder="Cerca per protocollo, ID pratica, utente, via, PG…" autocomplete="off">'+
+      '<div id="regCount" class="reg-count"></div><div class="reg-wrap"><table class="reg-table"><thead><tr>'+REG_COLS.map(function(c){return '<th>'+c[1]+'</th>';}).join('')+'</tr></thead><tbody id="regBody"></tbody></table></div>'+
+      '<div class="preview-actions" style="flex-wrap:wrap"><button type="button" class="bsmall" onclick="exportRegistryCSV()">Esporta CSV (Excel)</button><button type="button" class="bsmall" onclick="exportArchive()">Esporta archivio da condividere</button><button type="button" class="bsmall" onclick="document.getElementById(\'archiveFile\').click()">Unisci archivio di un collega</button><input type="file" id="archiveFile" accept=".json,application/json" style="display:none"></div>'+
+      '<div class="reg-note">L’archivio contiene registro e testi standard. Per lavorare con lo stesso registro, ogni collega esporta il proprio archivio e gli altri lo uniscono: i doppioni vengono scartati e l’avviso “pratica già lavorata” vale anche per le pratiche dei colleghi.</div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){if(e.target===ov)closeRegistry();});
+    document.getElementById('regSearch').addEventListener('input',renderRegistry);
+    document.getElementById('archiveFile').addEventListener('change',function(e){var f=e.target.files[0];e.target.value='';if(f)importArchive(f);});
+  }
+  ov.style.display='flex';renderRegistry();
+  var q=document.getElementById('regSearch');q.value=_v('protocollo')||'';renderRegistry();q.focus();q.select();
+}
+function closeRegistry(){var ov=document.getElementById('regOverlay');if(ov)ov.style.display='none';}
+function renderRegistry(){
+  var body=document.getElementById('regBody');if(!body)return;
+  var all=_registryAll().filter(_isSuoloRecord);
+  var words=String((document.getElementById('regSearch')||{}).value||'').toLowerCase().split(/\s+/).filter(Boolean);
+  var norm=function(s){return String(s||'').toLowerCase();};
+  var rows=all.filter(function(r){
+    var hay=norm(REG_COLS.map(function(c){return _regCell(r,c[0]);}).join(' '));
+    var hayN=_normalizzaRiferimento(hay);
+    return words.every(function(w){return hay.indexOf(w)>=0||(_normalizzaRiferimento(w)&&hayN.indexOf(_normalizzaRiferimento(w))>=0);});
+  });
+  document.getElementById('regCount').textContent=rows.length+' pratiche'+(words.length?' trovate su '+all.length:' registrate su questo dispositivo');
+  body.innerHTML=rows.slice(0,300).map(function(r){return '<tr>'+REG_COLS.map(function(c){return '<td>'+escapeHtml(_regCell(r,c[0]))+'</td>';}).join('')+'</tr>';}).join('')||'<tr><td colspan="'+REG_COLS.length+'" style="color:#7f8795">Nessuna pratica.</td></tr>';
+}
+function _download(blob,name){var u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},3000);}
+function exportArchive(){
+  var data={tipo:'archivio_pareri_suolo',versione:1,esportato:new Date().toISOString(),registro:_registryAll().filter(_isSuoloRecord),testi:libLoad()};
+  _download(new Blob([JSON.stringify(data,null,1)],{type:'application/json'}),'archivio_pareri_suolo_'+new Date().toISOString().slice(0,10)+'.json');
+}
+function _recordKey(r){return [r.timestamp,_normalizzaRiferimento(r['Protocollo SUAP']),_normalizzaRiferimento(r['PG Risposta'])].join('|');}
+async function importArchive(file){
+  try{
+    var data=JSON.parse(await file.text());
+    if(!data||data.tipo!=='archivio_pareri_suolo'||!Array.isArray(data.registro))throw new Error('Il file non è un archivio dei pareri di suolo pubblico.');
+    var reg=_registryAll(),keys={};reg.forEach(function(r){keys[_recordKey(r)]=1;});
+    var addR=data.registro.filter(function(r){return r&&typeof r==='object'&&!keys[_recordKey(r)];});
+    reg=reg.concat(addR).sort(function(a,b){return String(b.timestamp||'').localeCompare(String(a.timestamp||''));});
+    if(reg.length>3000)reg=reg.slice(0,3000);
+    localStorage.setItem(registryKey(),JSON.stringify(reg));
+    var lib=libLoad(),addT=0;
+    ['motivazione','prescrizioni'].forEach(function(k){((data.testi||{})[k]||[]).forEach(function(x){
+      if(x&&x.testo&&!lib[k].some(function(y){return y.testo===x.testo;})){lib[k].push({nome:String(x.nome||x.testo).slice(0,80),testo:String(x.testo)});addT++;}
+    });});
+    libSave(lib);renderLibraries();renderRegistry();checkDuplicatePractice();
+    mostraMsg('O','Archivio unito: '+addR.length+' pratiche e '+addT+' testi standard nuovi.');
+  }catch(e){mostraMsg('E','Importazione non riuscita: '+e.message);}
+}
+
+function initV71(){
+  var up=document.querySelector('#dz')&&document.querySelector('#dz').closest('.sec');
+  if(up&&!document.getElementById('queueSec')){
+    var sec=document.createElement('div');sec.className='sec';sec.id='queueSec';sec.style.display='none';
+    sec.innerHTML='<div class="sh" id="queueTitle">Coda pratiche</div><div class="q-prog"><div id="queueBar"></div></div><div id="queueList"></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="bsmall" onclick="nextQueueItem()">Prossima da lavorare →</button><button type="button" class="bsmall" onclick="document.getElementById(\'fi\').click()">Aggiungi PDF</button><button type="button" class="bsmall" onclick="clearQueue()">Svuota coda</button></div>';
+    up.insertAdjacentElement('afterend',sec);
+  }
+  renderLibraries();
+  window.addEventListener('beforeunload',function(e){
+    if(QUEUE.some(function(q){return q.status!=='fatta'&&q.status!=='saltata';})){e.preventDefault();e.returnValue='';}
+  });
+  document.addEventListener('keydown',function(ev){if(ev.key==='Escape')closeRegistry();});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initV71);else initV71();
 </script>
 </body>
 </html>
