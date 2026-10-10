@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pareri Suolo Pubblico v7.1 — U.O. San Lorenzo</title>
+<title>Pareri Suolo Pubblico v8.0 — U.O. San Lorenzo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,284 +11,456 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
+/* ===== Pareri suolo pubblico — sistema grafico v8 (dark) =====
+   Un solo foglio di stile: colori, raggi e spaziature vivono nei token qui sotto. */
+:root{
+  color-scheme:dark;
+  --bg:#0a0e16;--bg-grad:#0e1422;
+  --surface:#111827;--surface-2:#161f31;--surface-3:#1d2840;--field:#0f1626;
+  --border:#212c42;--border-2:#2c3a57;--border-focus:#5b8cff;
+  --text:#e8ecf4;--text-2:#a9b3c7;--text-3:#717d95;
+  --accent:#5b8cff;--accent-2:#3d6ff0;--accent-ink:#0b1630;--accent-soft:rgba(91,140,255,.12);
+  --ok:#3ecf8e;--ok-soft:rgba(62,207,142,.10);--ok-line:rgba(62,207,142,.35);
+  --warn:#f5b84b;--warn-soft:rgba(245,184,75,.10);--warn-line:rgba(245,184,75,.38);
+  --danger:#f47174;--danger-soft:rgba(244,113,116,.10);--danger-line:rgba(244,113,116,.38);
+  --r-sm:8px;--r:12px;--r-lg:16px;
+  --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px -12px rgba(0,0,0,.55);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;
+  --appbar-h:60px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111318;color:#e8eaf0;min-height:100vh;padding:20px 16px}
-.wrap{max-width:820px;margin:0 auto}
-.hdr{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #1f2330}
-.icon{width:40px;height:40px;background:#1e3a5f;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.badge{background:#1e3a5f;color:#60a5fa;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
-.msg{display:none;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;margin:12px 0;font-size:13px}
-.msg.L{background:#1a2535;color:#60a5fa;border:1px solid #1e3a5f}
-.msg.O{background:#0f2a1a;color:#4ade80;border:1px solid #14532d}
-.msg.E{background:#2a1a1a;color:#f87171;border:1px solid #7f1d1d}
-.spin{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sec{background:#16191f;border:1px solid #1f2330;border-radius:12px;padding:15px 18px;margin-bottom:12px}
-.sh{font-size:11px;font-weight:600;color:#4b5563;text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.sh::after{content:'';flex:1;height:1px;background:#1f2330}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.f{display:flex;flex-direction:column;gap:5px}
-label{font-size:11px;font-weight:500;color:#6b7280;text-transform:uppercase;letter-spacing:.4px}
-.ai{background:#0f2a1a;color:#4ade80;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600;text-transform:none;margin-left:4px}
-input,select,textarea{background:#1c1f28;color:#e8eaf0;border:1px solid #2a2d38;border-radius:8px;padding:8px 11px;font-size:13px;width:100%;outline:none;transition:border-color .15s;font-family:inherit}
-input:focus,select:focus,textarea:focus{border-color:#3b82f6}
-textarea{resize:vertical;min-height:80px}
-.er{display:flex;gap:10px;margin-bottom:8px}
-.be{flex:1;padding:11px;border-radius:10px;border:2px solid #2a2d38;background:#1c1f28;color:#9ca3af;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.be.ok{border-color:#4ade80;background:#0f2a1a;color:#4ade80}
-.be.no{border-color:#f87171;background:#2a1a1a;color:#f87171}
-.bai{background:#1e3a5f;color:#60a5fa;border:1px solid #1e3a5f;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px}
-.genbox{display:none;margin-top:8px;background:#0d1f0d;border:1px solid #14532d;border-radius:8px}
-.genbox-h{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #14532d;font-size:11px;color:#4ade80;font-weight:600}
-.genbox textarea{background:transparent;border:none;padding:12px;font-size:13px;color:#d1fae5;min-height:80px}
-.tog-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.tog{width:44px;height:24px;background:#2a2d38;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
-.knob{width:18px;height:18px;background:#6b7280;border-radius:50%;position:absolute;top:3px;left:3px;transition:all .2s}
-.drop{border:2px dashed #2a2d38;border-radius:10px;padding:28px;text-align:center;cursor:pointer;font-size:13px;color:#6b7280;transition:all .2s;margin-bottom:10px}
-.drop:hover{border-color:#3b82f6}
-.bman{width:100%;background:#0f1a2e;color:#60a5fa;border:1px solid #1e3a5f;border-radius:10px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
-.acts{display:flex;gap:10px;padding:4px 0 20px}
-.bgen{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:11px 24px;font-size:14px;font-weight:600;cursor:pointer;flex:1}
-.bgen:hover{background:#1d4ed8}
-.bgen:disabled{background:#374151;opacity:.7;cursor:not-allowed}
-.breset{background:transparent;color:#6b7280;border:1px solid #2a2d38;border-radius:10px;padding:11px 18px;font-size:13px;cursor:pointer}
+html{scroll-padding-top:calc(var(--appbar-h) + 24px)}
+body{font-family:var(--font);background:radial-gradient(1200px 600px at 70% -10%,var(--bg-grad),transparent 70%),var(--bg);background-attachment:fixed;color:var(--text);min-height:100vh;line-height:1.45;font-size:14px;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(91,140,255,.35)}
+:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}
+
+/* --- Barra superiore --- */
+.appbar{position:sticky;top:0;z-index:50;height:var(--appbar-h);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;background:rgba(10,14,22,.82);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;flex-shrink:1}
+.brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#3d6ff0,#7aa2ff);color:#fff;box-shadow:0 6px 18px -6px rgba(61,111,240,.7);flex-shrink:0}
+.brand-title{font-size:15px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.brand-sub{font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appbar-actions{display:flex;gap:4px;align-items:center;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.appbar-actions::-webkit-scrollbar{display:none}
+.appbar-actions .sep{width:1px;height:20px;background:var(--border-2);margin:0 6px;flex-shrink:0}
+
+/* --- Impianto --- */
+.wrap{max-width:1360px;margin:0 auto;padding:20px 24px 48px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-areas:"upload side" "form side";column-gap:24px;align-items:start}
+.area-upload{grid-area:upload;min-width:0}
+.area-form{grid-area:form;min-width:0}
+.area-side{grid-area:side;position:sticky;top:calc(var(--appbar-h) + 20px);display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - var(--appbar-h) - 40px);overflow:auto;scrollbar-width:thin;padding-bottom:4px}
 #form{display:block}
 
-.tpl-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.tpl-btn{padding:7px 12px;border-radius:8px;border:1px solid #2a2d38;background:#1c1f28;color:#9ca3af;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
-.tpl-btn.fav{border-color:#14532d;background:#0f2a1a;color:#4ade80}
-.tpl-btn.sfav{border-color:#7f1d1d;background:#2a1a1a;color:#f87171}
-.tpl-btn.pres{border-color:#92400e;background:#271a0a;color:#fbbf24}
-.tpl-btn.manif{border-color:#1e3a5f;background:#0f1e35;color:#60a5fa}
-.tpl-btn.cold{border-color:#3b2a0a;background:#1a1205;color:#fcd34d}
-.tpl-btn.torr{border-color:#9a3412;background:#2a160d;color:#fb923c}
-.tor-box{display:none;background:#20160f;border:1px solid #7c2d12;border-radius:12px;padding:14px;margin-top:10px}.tor-check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #3b2418}.tor-check:last-child{border-bottom:0}.tor-check input{width:auto;min-height:auto;margin-top:3px}.tor-preview{white-space:pre-wrap;background:#171b23;border:1px solid #303746;border-radius:9px;padding:12px;color:#fed7aa;font-size:12px;line-height:1.55;margin-top:10px}
-.grp-label{font-size:10px;color:#4b5563;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:4px;margin-top:8px}
+/* --- Messaggi --- */
+.msg{display:none;align-items:flex-start;gap:10px;padding:12px 14px 12px 16px;border-radius:var(--r);font-size:13px;line-height:1.45;border:1px solid;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(640px,calc(100vw - 32px));z-index:9000;box-shadow:0 20px 50px -12px rgba(0,0,0,.75);backdrop-filter:blur(12px);animation:toast-in .18s ease-out}
+.msg>span{flex:1}
+.msg .msg-x{background:transparent;border:0;color:inherit;opacity:.7;font-size:18px;line-height:1;cursor:pointer;padding:0 2px;margin-left:4px}.msg .msg-x:hover{opacity:1}
+@keyframes toast-in{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.msg.L{background:rgba(22,33,58,.92);color:#b7cbff;border-color:#2a3f6e}
+.msg.O{background:rgba(12,38,29,.94);color:#8ff0c2;border-color:var(--ok-line)}
+.msg.E{background:rgba(48,20,24,.94);color:#ffb3b5;border-color:var(--danger-line)}
+.spin{width:14px;height:14px;margin-top:2px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* Migliorie operative v2.1 */
-.ver{font-size:10px;color:#4b5563;margin-top:4px}.req::after{content:" *";color:#f87171}.invalid{border-color:#f87171!important;box-shadow:0 0 0 2px rgba(248,113,113,.12)}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.bsmall{background:#1c1f28;color:#9ca3af;border:1px solid #2a2d38;border-radius:8px;padding:7px 10px;font-size:11px;cursor:pointer}
-.checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.checkitem{display:flex;align-items:flex-start;gap:7px;background:#1c1f28;border:1px solid #2a2d38;border-radius:8px;padding:8px;font-size:12px;color:#cbd5e1}.checkitem input{width:auto;margin-top:2px}
-@media(max-width:650px){.g2,.g3,.checkgrid{grid-template-columns:1fr}.acts{flex-direction:column}}
+/* --- Sezioni --- */
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow)}
+.sh{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:650;letter-spacing:-.01em;color:var(--text);margin-bottom:16px}
+.sh .hint-inline{margin-left:auto;font-size:12px;font-weight:400;color:var(--text-3)}
+.step{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:700;flex-shrink:0}
+.sec.sub{border-color:var(--border-2);background:linear-gradient(180deg,var(--surface-2),var(--surface))}
+.sec.sub .sh{font-size:14px}
+.hint{font-size:12px;color:var(--text-3);line-height:1.55;margin-top:10px}
 
-/* ===== Rifinitura grafica istituzionale v3.1 ===== */
-:root{--panel:#161a22;--panel2:#1b202a;--line:#2a3140;--muted:#8b95a7;--accent:#5b9cf6;--radius:14px}
-body{background:#0f131a;line-height:1.45}
-.wrap{max-width:980px}
-.hdr{padding:4px 2px 20px;margin-bottom:24px;border-bottom-color:#2a3140}
-.hdr .icon{width:46px;height:46px;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.22)}
-.hdr .ver{font-size:11px!important;color:#778196!important;margin-top:4px!important}
-.sec{background:linear-gradient(180deg,#171b23 0%,#151922 100%);border-color:#272e3b;border-radius:14px;padding:19px 22px;margin-bottom:15px;box-shadow:0 5px 18px rgba(0,0,0,.10)}
-.sh{font-size:11px;color:#778196;margin-bottom:16px;letter-spacing:1px}.sh::after{background:#29313f}
-label{color:#9099aa;font-size:11px}
-input,select,textarea{background:#1c212b;border-color:#303746;border-radius:9px;padding:10px 12px;min-height:40px}
-input:focus,select:focus,textarea:focus{border-color:#5b9cf6;box-shadow:0 0 0 3px rgba(91,156,246,.12)}
-.tpl-btn,.be,.bman,.bgen,.breset,.bsmall{min-height:42px;border-radius:10px;transition:transform .12s ease,filter .12s ease,border-color .12s ease}
-.tpl-btn:hover,.be:hover,.bman:hover,.bgen:hover,.bsmall:hover{transform:translateY(-1px);filter:brightness(1.06)}
-.drop{background:#131821;border-color:#313949;border-radius:12px;padding:24px}
-.toolbar{position:sticky;top:8px;z-index:20;background:rgba(16,20,27,.94);backdrop-filter:blur(9px);border:1px solid #2c3442;border-radius:12px;padding:8px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.22)}
-.preview-card{border-radius:16px!important;box-shadow:0 24px 70px rgba(0,0,0,.45)!important}
-@media(max-width:700px){.wrap{max-width:100%}.g2,.g3{grid-template-columns:1fr}.sec{padding:16px}.tpl-bar{flex-direction:column}.acts{position:sticky;bottom:0;background:#0f131a;padding:10px 0 16px;z-index:15}}
+/* Sezioni richiudibili */
+details.fold>summary{list-style:none;cursor:pointer;margin:-20px -22px;padding:18px 22px;border-radius:var(--r-lg);user-select:none}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:'';margin-left:auto;width:8px;height:8px;border-right:2px solid var(--text-3);border-bottom:2px solid var(--text-3);transform:rotate(45deg);transition:transform .15s;flex-shrink:0}
+details.fold[open]>summary{margin-bottom:0}
+details.fold[open]>summary::after{transform:rotate(-135deg)}
+details.fold>summary:hover{background:rgba(255,255,255,.015)}
+details.fold[open]>.fold-body{margin-top:24px}
+.fold-sum{font-size:12px;font-weight:400;color:var(--text-3);margin-left:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+details.fold[open] .fold-sum{display:none}
 
+/* --- Griglie e campi --- */
+.g2,.g3,.g4{display:grid;gap:14px;margin-bottom:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:minmax(0,1.2fr) minmax(0,.6fr) minmax(0,.9fr) minmax(0,1.3fr)}
+.f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.f>label,.f label{font-size:12px;font-weight:550;color:var(--text-2);letter-spacing:.005em}
+label.auto::after{content:'dal PDF';margin-left:7px;font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:5px;vertical-align:1px}
+.ai{display:none}
+input,select,textarea{font-family:inherit;font-size:13.5px;color:var(--text);background:var(--field);border:1px solid var(--border-2);border-radius:10px;padding:9px 12px;width:100%;min-height:40px;outline:none;transition:border-color .12s,box-shadow .12s,background .12s}
+input::placeholder,textarea::placeholder{color:#55607a}
+input:hover,select:hover,textarea:hover{border-color:#3a4a6b}
+input:focus,select:focus,textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(91,140,255,.18);background:#101a2e}
+input[readonly]{background:var(--surface-2);color:var(--text-2);border-style:dashed}
+select{appearance:none;-webkit-appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a9b3c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+textarea{resize:vertical;min-height:84px;line-height:1.5}
+input[type=checkbox]{width:16px;height:16px;min-height:0;accent-color:var(--accent);flex-shrink:0;margin-top:2px}
+.mono,#praticaId,#protocollo,#pgR,#annoProt{font-family:var(--mono);font-size:13px;letter-spacing:.01em}
+.invalid{border-color:var(--danger)!important;box-shadow:0 0 0 3px rgba(244,113,116,.16)!important}
+.field-row{display:flex;gap:8px}.field-row>input{flex:1}
 
-/* ===== v7.0: dati essenziali, candidati, suggerimento modello, revisione Word ===== */
-.ess-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.ess{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid;font-family:inherit;min-width:0}
-.ess small{font-size:11px;font-weight:400;opacity:.85;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ess.ok{background:#0f2a1a;border-color:#166534;color:#86efac}.ess.ko{background:#2a1a1a;border-color:#7f1d1d;color:#fca5a5}.ess.warn{background:#271a0a;border-color:#92400e;color:#fcd34d}
-.cand{display:none;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;font-size:11px;color:#94a3b8}
-.cand button{background:#1c2433;color:#bfdbfe;border:1px dashed #3b5b8f;border-radius:7px;padding:4px 8px;font-size:11px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dup-warn{display:none;margin-top:10px;background:#271a0a;border:1px solid #92400e;color:#fcd34d;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5}
-.tpl-hint{display:none;margin:0 0 10px;background:#0f1e35;border:1px solid #1e3a5f;color:#93c5fd;border-radius:10px;padding:9px 12px;font-size:12px}
-.tpl-btn.sugg{outline:2px dashed #60a5fa;outline-offset:2px}
-.review-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:#cbd5e1}.review-row input{width:auto;min-height:0}
-.kbd-hint{font-size:11px;color:#64748b;margin:-12px 0 16px}
-@media(max-width:650px){.ess-bar{grid-template-columns:1fr}}
-/* v7.1: coda pratiche, testi standard, registro */
-.q-prog{height:6px;background:#1f2633;border-radius:4px;overflow:hidden;margin:-4px 0 12px}.q-prog div{height:100%;background:#22c55e;width:0;transition:width .3s}
+/* --- Pulsanti --- */
+button{font-family:inherit}
+.bgen,.breset,.bman,.bsmall,.btn-ghost,.chip{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;cursor:pointer;font-weight:600;transition:background .12s,border-color .12s,color .12s,transform .08s,box-shadow .12s;white-space:nowrap}
+.bgen:active,.breset:active,.bman:active,.bsmall:active,.btn-ghost:active,.chip:active{transform:translateY(1px)}
+.bgen{width:100%;min-height:48px;padding:12px 18px;font-size:14.5px;color:#fff;border:1px solid #5c8bff;background:linear-gradient(180deg,#4f80ff,#3566e8);box-shadow:0 10px 24px -10px rgba(61,111,240,.85),0 1px 0 rgba(255,255,255,.18) inset}
+.bgen:hover{background:linear-gradient(180deg,#5e8cff,#3d6ff0)}
+.bgen:disabled{background:var(--surface-3);border-color:var(--border-2);color:var(--text-3);box-shadow:none;cursor:progress}
+.breset{width:100%;min-height:40px;padding:9px 14px;font-size:13px;color:var(--text-2);background:transparent;border:1px solid var(--border-2)}
+.breset:hover{color:var(--text);border-color:#3a4a6b;background:var(--surface-2)}
+.bman{min-height:40px;padding:9px 16px;font-size:13px;color:#cfdcff;background:var(--accent-soft);border:1px solid rgba(91,140,255,.35)}
+.bman:hover{background:rgba(91,140,255,.2)}
+.bman:disabled{opacity:.6;cursor:progress}
+.bsmall,.chip{min-height:34px;padding:6px 12px;font-size:12.5px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border-2)}
+.bsmall:hover,.chip:hover{color:var(--text);border-color:#3a4a6b;background:var(--surface-3)}
+.btn-ghost{min-height:34px;padding:6px 11px;font-size:12.5px;font-weight:550;color:var(--text-2);background:transparent;border:1px solid transparent}
+.btn-ghost:hover{color:var(--text);background:var(--surface-2);border-color:var(--border)}
+.btn-ghost.strong{color:var(--text);border-color:var(--border-2)}
+
+/* --- Caricamento PDF --- */
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:1.5px dashed var(--border-2);border-radius:var(--r);padding:26px 20px;cursor:pointer;background:linear-gradient(180deg,rgba(91,140,255,.04),transparent);transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface-3);color:var(--accent);margin-bottom:4px}
+.drop-t{font-size:14px;font-weight:600;color:var(--text)}
+.drop-t u{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(91,140,255,.5)}
+.drop-t b{color:var(--ok);font-weight:600;word-break:break-all}
+.drop-s{font-size:12px;color:var(--text-3)}
+details.mini-fold{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+details.mini-fold>summary{cursor:pointer;font-size:12.5px;color:var(--text-2);list-style:none;display:flex;align-items:center;gap:8px}
+details.mini-fold>summary::-webkit-details-marker{display:none}
+details.mini-fold>summary::before{content:'+';display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:var(--surface-3);color:var(--text-2);font-weight:700;font-size:12px}
+details.mini-fold[open]>summary::before{content:'–'}
+details.mini-fold>summary:hover{color:var(--text)}
+.mini-fold-body{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.mini-fold-body .bman{align-self:flex-start}
+
+/* --- Tipo di parere --- */
+.tpl-grid{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 16px;align-items:center}
+.grp-label{font-size:12px;font-weight:550;color:var(--text-3)}
+.tpl-bar{display:flex;gap:8px;flex-wrap:wrap}
+.tpl-btn{--c:var(--ok);--c-soft:var(--ok-soft);--c-line:var(--ok-line);position:relative;display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:7px 13px 7px 11px;border-radius:999px;border:1px solid var(--border-2);background:var(--surface-2);color:var(--text-2);font-size:12.5px;font-weight:600;cursor:pointer;transition:background .12s,border-color .12s,color .12s,box-shadow .12s}
+.tpl-btn::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px var(--c-soft);flex-shrink:0}
+.tpl-btn[data-esito=pres]{--c:var(--warn);--c-soft:var(--warn-soft);--c-line:var(--warn-line)}
+.tpl-btn[data-esito=sfav]{--c:var(--danger);--c-soft:var(--danger-soft);--c-line:var(--danger-line)}
+.tpl-btn:hover{color:var(--text);border-color:var(--c-line)}
+.tpl-btn.active{color:var(--text);background:var(--c-soft);border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset}
+.tpl-btn.sugg:not(.active){border-style:dashed;border-color:var(--accent)}
+.tpl-hint{display:none;margin:0 0 14px;background:var(--accent-soft);border:1px solid rgba(91,140,255,.3);color:#c5d5ff;border-radius:10px;padding:9px 12px;font-size:12.5px}
+
+/* Prescrizioni Torronari */
+.tor-box{display:none}
+.tor-check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--field);margin-bottom:8px;font-size:13px;color:var(--text-2)}
+.tor-check label{font-size:13px;font-weight:400;color:var(--text-2);cursor:pointer}
+.tor-preview{white-space:pre-wrap;margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--field);border:1px solid var(--border);font-size:12.5px;color:var(--text-2);line-height:1.6;max-height:240px;overflow:auto}
+
+/* Candidati trovati nel PDF */
+.cand{display:none;flex-wrap:wrap;gap:6px;align-items:center;font-size:11.5px;color:var(--text-3)}
+.cand button{background:var(--accent-soft);color:#c5d5ff;border:1px dashed rgba(91,140,255,.45);border-radius:7px;padding:3px 8px;font-size:11.5px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono)}
+.cand button:hover{background:rgba(91,140,255,.2)}
+
+/* Testi standard */
+.lib-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.lib-bar select{flex:1;min-width:200px;width:auto;min-height:34px;padding-top:6px;padding-bottom:6px;font-size:12.5px}
+.lib-bar button{min-height:34px;background:var(--surface-2);color:var(--text-2);border:1px solid var(--border-2);border-radius:9px;padding:6px 11px;font-size:12px;font-weight:550;cursor:pointer}
+.lib-bar button:hover{color:var(--text);background:var(--surface-3)}
+
+/* --- Pannello laterale --- */
+.side-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow)}
+.side-title{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px}
+.side-title .score{font-size:11px;letter-spacing:0;text-transform:none;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface-3);color:var(--text-2)}
+.side-title .score.ok{background:var(--ok-soft);color:var(--ok)}
+.ess-bar,.ready-list{display:flex;flex-direction:column;gap:2px}
+.ess,.ready-item{display:grid;grid-template-columns:20px minmax(0,1fr);column-gap:8px;align-items:start;text-align:left;width:100%;background:transparent;border:0;border-radius:9px;padding:5px 8px;cursor:pointer;color:var(--text);font-size:13px;font-weight:550;font-family:inherit}
+.ess:hover,.ready-item:hover{background:var(--surface-2)}
+.ess>b,.ready-item>b{grid-row:span 2;display:grid;place-items:center;width:20px;height:20px;border-radius:6px;font-size:11px;font-weight:800}
+.ess small,.ready-item small{grid-column:2;font-size:11.5px;font-weight:400;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono)}
+.ready-item small{font-family:inherit}
+.ess.ok>b,.ready-item.ok>b{background:var(--ok-soft);color:var(--ok)}
+.ess.ko>b,.ready-item.ko>b{background:var(--danger-soft);color:var(--danger)}
+.ess.warn>b,.ready-item.warn>b{background:var(--warn-soft);color:var(--warn)}
+.ess:nth-child(3) small{font-family:inherit}.ess.ko small{color:#d98b8d}.ess.warn small{color:#d9ac5e}
+.ready-list{border-top:1px solid var(--border);margin-top:6px;padding-top:6px}
+.dup-warn{display:none;margin-top:10px;background:var(--warn-soft);border:1px solid var(--warn-line);color:#f8d58f;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5}
+.side-actions{display:flex;flex-direction:column;gap:10px}
+.switch{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--text-2);cursor:pointer;line-height:1.4}
+.acts{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+.kbd-hint{font-size:11.5px;color:var(--text-3);text-align:center;line-height:1.8}
+kbd{font-family:var(--mono);font-size:10.5px;padding:1px 5px;border-radius:5px;border:1px solid var(--border-2);border-bottom-width:2px;background:var(--surface-2);color:var(--text-2)}
+.ready-box{background:linear-gradient(180deg,rgba(62,207,142,.12),rgba(62,207,142,.04));border:1px solid var(--ok-line);border-radius:var(--r-lg);padding:14px 16px}
+.ready-box .rb-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ok);margin-bottom:6px}
+.ready-box .rb-name{font-family:var(--mono);font-size:11.5px;color:#bff3d9;margin-bottom:12px;word-break:break-all}
+.ready-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ready-actions a,.ready-actions button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;border-radius:9px;padding:8px 13px;font-size:12.5px;font-weight:650;cursor:pointer;text-decoration:none;font-family:inherit}
+.ready-actions a{background:var(--ok);color:#06281a;border:0}
+.ready-actions a:hover{filter:brightness(1.08)}
+.ready-actions button{background:transparent;color:var(--text);border:1px solid var(--border-2)}
+.ready-actions #queueNextBtn{background:var(--accent-2)!important;color:#fff!important;border:0!important}
+.ready-box .rb-note{font-size:11px;color:#8fd9b5;margin-top:10px}
+
+/* --- Coda pratiche --- */
+.q-prog{height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin:-6px 0 14px}.q-prog div{height:100%;background:linear-gradient(90deg,var(--ok),#7ee2b5);width:0;transition:width .3s}
 #queueList{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
-.q-row{display:flex;align-items:center;gap:10px;background:#1b202a;border:1px solid #2a3140;border-radius:10px;padding:8px 10px}
-.q-row.current{border-color:#3b82f6;background:#132037}
-.q-n{font-size:11px;color:#64748b;min-width:18px;text-align:right}
-.q-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.q-main b{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.q-main small{font-size:11px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.q-main em{color:#fca5a5;font-style:normal}
-.q-st{font-size:10px;font-weight:700;border-radius:6px;padding:3px 7px;white-space:nowrap;background:#273042;color:#cbd5e1}
-.q-st.pronta{background:#0f1e35;color:#93c5fd}.q-st.fatta{background:#0f2a1a;color:#86efac}.q-st.errore{background:#2a1a1a;color:#fca5a5}.q-st.saltata{background:#1f2430;color:#64748b}
-.q-act{display:flex;gap:5px}.q-act button{background:#1c2433;color:#cbd5e1;border:1px solid #334155;border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer;min-height:0}
-.lib-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.lib-bar select{flex:1;min-width:180px;width:auto}
-.lib-bar button{background:#1c1f28;color:#9ca3af;border:1px solid #2a2d38;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;min-height:0}
-.reg-card{width:min(1100px,100%)!important}.reg-count{font-size:11px;color:#7f8795;margin:8px 0}
-.reg-wrap{overflow:auto;max-height:55vh;border:1px solid #242833;border-radius:8px}
-.reg-table{border-collapse:collapse;width:100%;font-size:11px}.reg-table th{position:sticky;top:0;background:#1b202a;color:#9099aa;text-align:left;font-weight:600;padding:7px 8px;white-space:nowrap}
-.reg-table td{padding:6px 8px;border-top:1px solid #242833;color:#d1d5db;vertical-align:top;max-width:260px;overflow-wrap:anywhere}
-.reg-note{font-size:11px;color:#7f8795;margin-top:10px;line-height:1.5}
-@media(max-width:650px){.q-row{flex-wrap:wrap}.q-act{width:100%;justify-content:flex-end}.q-main small{white-space:normal}}
-/* Editor Word — stesso aspetto di Amministrativa 3.0 */
-.a3-review-overlay{position:fixed;inset:0;z-index:100000;background:rgba(5,10,20,.92);display:flex;align-items:center;justify-content:center;padding:12px;font-family:Arial,sans-serif;color:#e9eff8}
-.a3-review-dialog{width:min(960px,100%);height:min(94vh,100%);background:#141b28;border:1px solid #43536c;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 70px #000a}
-.a3-review-head{padding:16px 18px;border-bottom:1px solid #344259}.a3-review-head h2{font-size:20px;margin:0 0 6px}.a3-review-head p{font-size:12px;color:#adc0d5;margin:0;line-height:1.45}
-.a3-review-tabs,.a3-review-tools,.a3-review-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:10px 16px;border-bottom:1px solid #344259}
-.a3-review-tools button,.a3-review-tabs button,.a3-review-actions button{font:inherit;font-size:12px;background:#26354a;color:#e9eff8;border:1px solid #526683;border-radius:8px;padding:8px 10px;cursor:pointer;min-height:0}
-.a3-review-tools button:disabled{opacity:.4;cursor:default}.a3-review-tabs button[aria-selected=true]{background:#2555aa;border-color:#7ea8ff}
-.a3-review-pages{overflow:auto;padding:18px;background:#253044;flex:1}.a3-review-paper{max-width:780px;margin:0 auto;background:white;color:#202020;min-height:60vh;padding:48px 55px;box-shadow:0 3px 20px #0004}
+.q-row{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:9px 12px}
+.q-row.current{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:#131f38}
+.q-n{font-size:11px;color:var(--text-3);min-width:18px;text-align:right;font-family:var(--mono)}
+.q-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.q-main b{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-main small{font-size:11.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.q-main em{color:#f0a3a5;font-style:normal}
+.q-st{font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 9px;white-space:nowrap;background:var(--surface-3);color:var(--text-2)}
+.q-st.pronta{background:var(--accent-soft);color:#a9c1ff}.q-st.fatta{background:var(--ok-soft);color:var(--ok)}.q-st.errore{background:var(--danger-soft);color:var(--danger)}.q-st.saltata{color:var(--text-3)}
+.q-act{display:flex;gap:5px}.q-act button{background:transparent;color:var(--text-2);border:1px solid var(--border-2);border-radius:8px;padding:5px 10px;font-size:11.5px;cursor:pointer}
+.q-act button:hover{color:var(--text);background:var(--surface-3)}
+.q-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* --- Finestre: anteprima e registro --- */
+.preview-overlay{display:none;position:fixed;inset:0;background:rgba(4,7,13,.78);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:18px}
+.preview-card{width:min(760px,100%);max-height:88vh;overflow:auto;background:var(--surface);border:1px solid var(--border-2);border-radius:var(--r-lg);padding:20px;box-shadow:0 30px 80px -20px rgba(0,0,0,.8)}
+.preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:15px}
+.preview-head button{background:var(--surface-2);border:1px solid var(--border-2);color:var(--text-2);width:32px;height:32px;border-radius:9px;font-size:18px;cursor:pointer;line-height:1}
+.preview-head button:hover{color:var(--text)}
+.preview-row{display:grid;grid-template-columns:minmax(150px,32%) 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.preview-row span{color:var(--text-3)}.preview-row b{font-weight:500;white-space:normal}
+.preview-actions{display:flex;gap:10px;margin-top:16px}.preview-actions .bgen{width:auto}
+.reg-card{width:min(1100px,100%)!important}.reg-count{font-size:12px;color:var(--text-3);margin:10px 0}
+.reg-wrap{overflow:auto;max-height:55vh;border:1px solid var(--border);border-radius:10px}
+.reg-table{border-collapse:collapse;width:100%;font-size:12px}
+.reg-table th{position:sticky;top:0;background:var(--surface-2);color:var(--text-2);text-align:left;font-weight:600;padding:9px 10px;white-space:nowrap;border-bottom:1px solid var(--border-2)}
+.reg-table td{padding:8px 10px;border-top:1px solid var(--border);color:var(--text);vertical-align:top;max-width:260px;overflow-wrap:anywhere}
+.reg-table tr:hover td{background:rgba(255,255,255,.02)}
+.reg-note{font-size:11.5px;color:var(--text-3);margin-top:12px;line-height:1.55}
+
+/* --- Editor Word (stesso impianto di Amministrativa 3.0) --- */
+.a3-review-overlay{position:fixed;inset:0;z-index:100000;background:rgba(4,7,13,.9);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:12px;font-family:var(--font);color:var(--text)}
+.a3-review-dialog{width:min(980px,100%);height:min(94vh,100%);background:var(--surface);border:1px solid var(--border-2);border-radius:var(--r-lg);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px -20px #000}
+.a3-review-head{padding:16px 20px;border-bottom:1px solid var(--border)}.a3-review-head h2{font-size:17px;font-weight:650;margin:0 0 6px}.a3-review-head p{font-size:12.5px;color:var(--text-2);margin:0;line-height:1.5}
+.a3-review-tabs,.a3-review-tools,.a3-review-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:10px 18px;border-bottom:1px solid var(--border)}
+.a3-review-tools button,.a3-review-tabs button,.a3-review-actions button{font:inherit;font-size:12.5px;font-weight:550;background:var(--surface-2);color:var(--text);border:1px solid var(--border-2);border-radius:9px;padding:7px 11px;cursor:pointer;min-height:0}
+.a3-review-tools button:hover:not(:disabled),.a3-review-tabs button:hover{background:var(--surface-3)}
+.a3-review-tools button:disabled{opacity:.35;cursor:default}.a3-review-tabs button[aria-selected=true]{background:var(--accent-soft);border-color:var(--accent);color:#dbe5ff}
+.a3-review-pages{overflow:auto;padding:22px;background:#1a2133;flex:1}.a3-review-paper{max-width:780px;margin:0 auto;background:#fff;color:#202020;min-height:60vh;padding:48px 55px;border-radius:3px;box-shadow:0 10px 40px -10px rgba(0,0,0,.6)}
 .a3-review-part{font:700 11px Arial,sans-serif;color:#657286;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #d5dbe3;margin:16px 0 14px;padding-bottom:5px}
 .a3-review-row{padding:3px 6px;margin:3px -6px 12px;border:1px solid transparent;border-radius:4px}.a3-review-row.selected{border-color:#1769d2;background:#edf5ff}.a3-review-row.deleted{opacity:.55;text-decoration:line-through}
-.a3-review-row textarea{display:block;width:100%;min-height:35px;resize:vertical;border:0;outline:0;background:transparent;color:#202020;font:16px/1.45 Georgia,serif;overflow:hidden;padding:0;border-radius:0;box-shadow:none}.a3-review-row textarea:focus{box-shadow:none}.a3-review-row.readonly{font:16px/1.45 Georgia,serif;color:#333}.a3-review-row small{display:block;color:#785d21;font:11px Arial,sans-serif;margin-top:3px}
-.a3-review-warnings{padding:9px 16px;color:#f6c977;font-size:12px;max-height:78px;overflow:auto}.a3-review-actions{border-top:1px solid #344259;border-bottom:0;justify-content:flex-end}.a3-review-actions .primary{background:#315dd3;border-color:#7299ff;font-weight:700}
-.a3-review-actions label{margin-right:auto;font-size:12px;color:#f6c977;text-transform:none;letter-spacing:0}.a3-review-actions input{vertical-align:middle;width:auto;min-height:0}
-@media(max-width:650px){.a3-review-paper{padding:25px 18px}.a3-review-pages{padding:8px}.a3-review-tools button{padding:7px}}
-</style>
+.a3-review-row textarea{display:block;width:100%;min-height:35px;resize:vertical;border:0;outline:0;background:transparent;color:#202020;font:16px/1.45 Georgia,serif;overflow:hidden;padding:0;border-radius:0;box-shadow:none}.a3-review-row textarea:focus{box-shadow:none;background:transparent}.a3-review-row.readonly{font:16px/1.45 Georgia,serif;color:#333}.a3-review-row small{display:block;color:#785d21;font:11px Arial,sans-serif;margin-top:3px}
+.a3-review-warnings{padding:10px 18px;color:#f6c977;font-size:12px;max-height:78px;overflow:auto}.a3-review-actions{border-top:1px solid var(--border);border-bottom:0;justify-content:flex-end}.a3-review-actions .primary{background:linear-gradient(180deg,#4f80ff,#3566e8);border-color:#5c8bff;color:#fff;font-weight:700}
+.a3-review-actions label{margin-right:auto;font-size:12px;color:#f6c977}.a3-review-actions input{vertical-align:middle;width:auto;min-height:0}
 
-<style id="deepReviewStyles">
-.invalid{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.12)}.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}.bsmall{background:#1c1f28;color:#cbd5e1;border:1px solid #343846;border-radius:8px;padding:8px 11px;font-size:12px;cursor:pointer}.preview-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;align-items:center;justify-content:center;padding:18px}.preview-card{width:min(760px,100%);max-height:88vh;overflow:auto;background:#16191f;border:1px solid #343846;border-radius:14px;padding:16px}.preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.preview-head button{background:none;border:0;color:#fff;font-size:24px;cursor:pointer}.preview-row{display:grid;grid-template-columns:minmax(150px,32%) 1fr;gap:12px;padding:8px 0;border-bottom:1px solid #242833;font-size:12px}.preview-row span{color:#7f8795}.preview-row b{font-weight:500;white-space:normal}.preview-actions{display:flex;gap:10px;margin-top:16px}.check-row{display:grid;grid-template-columns:1fr 170px;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #222631;font-size:12px}.ver{font-size:10px;color:#4b5563;margin-top:3px}@media(max-width:620px){.check-row,.preview-row{grid-template-columns:1fr}.er{flex-wrap:wrap}}
+/* --- Schermi medi e telefono --- */
+@media(max-width:1100px){
+  .layout{grid-template-columns:minmax(0,1fr) 300px}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tpl-grid{grid-template-columns:1fr;gap:6px}
+  .grp-label{margin-top:6px}
+}
+@media(max-width:860px){
+  :root{--appbar-h:56px}
+  .appbar{padding:0 14px}
+  .brand-sub{display:none}
+  .appbar-actions .opt{display:none}
+  .brand-title{overflow:hidden;text-overflow:ellipsis}
+  .wrap{padding:14px 14px 140px}
+  .layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"upload" "side" "form"}
+  .area-side{position:static;max-height:none;overflow:visible;margin-bottom:16px}
+  .area-side .acts{position:fixed;left:0;right:0;bottom:0;z-index:60;flex-direction:row;margin:0;background:rgba(10,14,22,.94);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:10px 14px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -12px 30px -10px rgba(0,0,0,.6)}
+  .area-side .acts .bgen{flex:1;min-height:46px}.area-side .acts .breset{width:auto;min-height:46px}
+  .kbd-hint{display:none}
+  .msg{bottom:calc(84px + env(safe-area-inset-bottom))}
+  .sec{padding:16px;border-radius:14px}
+  details.fold>summary{margin:-16px;padding:16px}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .preview-row{grid-template-columns:1fr}
+  .q-row{flex-wrap:wrap}.q-act{width:100%;justify-content:flex-end}.q-main small{white-space:normal}
+  .a3-review-paper{padding:25px 18px}.a3-review-pages{padding:8px}
+}
+@media print{.appbar,.area-side{display:none}}
 </style>
 </head>
 <body>
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
+    <div style="min-width:0">
+      <div class="brand-title">Pareri suolo pubblico</div>
+      <div class="brand-sub">U.O. San Lorenzo · Polizia Amministrativa · Amministrativa 2.0 · v8.0</div>
+    </div>
+  </div>
+  <nav id="draftTools" class="appbar-actions" aria-label="Strumenti">
+    <button type="button" class="btn-ghost strong" onclick="openRegistry()">Registro pratiche</button>
+    <button type="button" class="btn-ghost opt" onclick="showPreview()">Anteprima dati</button>
+    <span class="sep opt" aria-hidden="true"></span>
+    <button type="button" class="btn-ghost opt" onclick="saveDraft(true)">Salva bozza</button>
+    <button type="button" class="btn-ghost opt" onclick="loadDraft(true)">Riprendi</button>
+    <button type="button" class="btn-ghost opt" onclick="clearDraft()">Cancella</button>
+  </nav>
+</header>
+
 <div class="wrap">
-  <div class="hdr">
-    <div class="icon">&#128205;</div>
-    <div>
-      <div style="font-size:16px;font-weight:600">Pareri Occupazione Suolo Pubblico &nbsp;<span class="badge">U.O. SAN LORENZO</span></div>
-      <div style="font-size:12px;color:#6b7280;margin-top:2px">Amministrativa 2.0 — v7.1</div>
-    </div>
-  </div>
-  <div id="msg" class="msg"></div>
+  <div id="msg" class="msg" role="status" aria-live="polite"></div>
+  <div class="layout">
 
-  <!-- VERSIONE PUBBLICA GITHUB: estrazione PDF locale, nessuna chiave privata incorporata -->
-  <div class="sec"><div class="sh">Carica il PDF della pratica</div>
-    <div id="dz" class="drop">&#128196; Trascina qui il PDF oppure clicca per selezionarlo<br><span style="font-size:11px;color:#64748b">Puoi trascinarne anche molti insieme: si crea la coda delle pratiche</span></div>
-    <input type="file" id="fi" accept=".pdf,application/pdf" multiple style="display:none">
-    <div style="font-size:11px;color:#94a3b8;line-height:1.55;margin-top:9px">Il documento viene letto soltanto nel browser e non viene inviato all'esterno. Dopo l'estrazione controlla sempre Pratica ID e Protocollo SUAP.</div>
-    <button type="button" id="bAI" class="bman" onclick="analizzaAI()">Estrai i dati dal PDF</button>
-    <div class="f" style="margin-top:14px"><label>Testo della comunicazione (facoltativo)</label><textarea id="mailText" rows="5" placeholder="Se il PDF è una scansione senza testo, incolla qui il testo della comunicazione e premi Estrai i dati"></textarea></div>
-    <div id="essentials" class="ess-bar" aria-live="polite"></div>
-    <div id="dupWarn" class="dup-warn" role="alert"></div>
-  </div>
+    <!-- VERSIONE PUBBLICA GITHUB: estrazione PDF locale, nessuna chiave privata incorporata -->
+    <section class="area-upload">
+      <div class="sec" id="secUpload"><div class="sh"><span class="step">1</span>Pratica</div>
+        <div id="dz" class="drop" role="button" tabindex="0" aria-label="Carica i PDF delle pratiche"></div>
+        <input type="file" id="fi" accept=".pdf,application/pdf" multiple style="display:none">
+        <p class="hint">Il PDF viene letto solo in questo browser e non viene inviato all’esterno; le scansioni passano dal riconoscimento ottico. Controlla sempre protocollo SUAP e ID pratica.</p>
+        <details class="mini-fold">
+          <summary>Incolla il testo della comunicazione (PEC o scansione illeggibile)</summary>
+          <div class="mini-fold-body">
+            <div class="f"><label for="mailText">Testo della comunicazione (facoltativo)</label><textarea id="mailText" rows="5" placeholder="Incolla qui il testo e premi «Estrai i dati dal PDF»: verrà letto insieme al PDF caricato, se presente"></textarea></div>
+            <button type="button" id="bAI" class="bman" onclick="analizzaAI()">Estrai i dati dal PDF</button>
+          </div>
+        </details>
+      </div>
+    </section>
 
-  <div id="form">
-    <div class="sec"><div class="sh">Tipo parere</div>
-      <div id="tplHint" class="tpl-hint"></div>
-      <div class="grp-label">&#127979; Attività commerciali / suolo generico</div>
-      <div class="tpl-bar">
-        <button class="tpl-btn fav" onclick="setTpl('FAV')" id="tFAV">&#10003; Favorevole</button>
-        <button class="tpl-btn pres" onclick="setTpl('FAVP')" id="tFAVP">&#9670; Fav. con Prescrizioni</button>
-        <button class="tpl-btn sfav" onclick="setTpl('SFAV')" id="tSFAV">&#10007; Sfavorevole</button>
+    <aside class="area-side" aria-label="Riepilogo e generazione">
+      <div id="pdfReadyBox" class="ready-box" style="display:none">
+        <div class="rb-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Documento pronto</div>
+        <div id="pdfReadyName" class="rb-name"></div>
+        <div class="ready-actions">
+          <a id="pdfReadyLink" href="#" download>⬇ Scarica documento</a>
+          <button type="button" id="pdfOpenBtn">Apri documento</button>
+        </div>
+        <div class="rb-note">Il collegamento resta valido finché non generi un nuovo documento o chiudi la pagina.</div>
       </div>
-      <div class="grp-label">&#127881; Manifestazioni / eventi</div>
-      <div class="tpl-bar">
-        <button class="tpl-btn manif" onclick="setTpl('FAV_DEDALUS')" id="tFAV_DEDALUS">&#10003; Favorevole DEDALUS</button>
-        <button class="tpl-btn manif" onclick="setTpl('FAV_MANIF')" id="tFAV_MANIF">&#10003; Favorevole Manifestazione</button>
-        <button class="tpl-btn manif" style="border-color:#1e5a8f" onclick="setTpl('FAVP_MANIF')" id="tFAVP_MANIF">&#9670; Fav. con Prescrizioni Manifestazione</button>
-        <button class="tpl-btn sfav" onclick="setTpl('SFAV_MANIF')" id="tSFAV_MANIF">&#10007; Sfavorevole Manifestazione</button>
+      <div class="side-card">
+        <div class="side-title">Pronto per generare <span id="readyScore" class="score"></span></div>
+        <div id="essentials" class="ess-bar" aria-live="polite"></div>
+        <div id="readyList" class="ready-list"></div>
+        <div id="dupWarn" class="dup-warn" role="alert"></div>
       </div>
-      <div class="grp-label">&#127807; Coldiretti / mercati agricoli</div>
-      <div class="tpl-bar">
-        <button class="tpl-btn cold" onclick="setTpl('COLD')" id="tCOLD">&#10003; Favorevole Coldiretti</button>
-      </div>
-      <div class="grp-label">&#127852; Torronari</div>
-      <div class="tpl-bar">
-        <button class="tpl-btn torr" onclick="setTpl('TOR_FAV')" id="tTOR_FAV">&#10003; Favorevole Torronari</button>
-        <button class="tpl-btn sfav" onclick="setTpl('TOR_SFAV')" id="tTOR_SFAV">&#10007; Sfavorevole Torronari</button>
-      </div>
-      <input type="hidden" id="tpl" value="FAV">
-    </div>
-    <div class="sec"><div class="sh">Riferimenti risposta</div>
-      <div class="g2">
-        <div class="f"><label>PG Risposta</label><input id="pgR" placeholder="es. 322647"></div>
-        <div class="f"><label>Data risposta (GG/MM/AA)</label><input id="dataR" oninput="var di=document.getElementById('dataI'); if(di) di.value=this.value;"></div>
-      </div>
-    </div>
-    <div class="sec"><div class="sh">Dati pratica</div>
-      <div class="g2">
-        <div class="f"><label>Pratica ID<span class="ai">AI</span></label><input id="praticaId" placeholder="es. MTAVLR91B54F839I-22122025-1543"></div>
-        <div class="f"><label>Richiedente<span class="ai">AI</span></label><input id="richiedente" placeholder="es. AMATO VALERIA"></div>
-      </div>
-      <div class="g2">
-        <div class="f"><label>Protocollo SUAP<span class="ai">AI</span></label><input id="protocollo" placeholder="es. 1199044/2025" oninput="syncProtSuapRef()"></div>
-        <div class="f"><label>Ubicazione<span class="ai">AI</span></label><input id="ubicazione" placeholder="es. VIA DUOMO 168"></div>
-      </div>
-      <div class="f" style="margin-bottom:12px">
-        <label>Data / periodo occupazione</label>
-        <div style="display:flex;gap:8px">
-          <input id="dataOcc" placeholder="es. 24-25-26 LUGLIO" style="flex:1">
-          <button onclick="document.getElementById('dataOcc').value='CONTINUATIVA'" style="background:#1c1f28;color:#9ca3af;border:1px solid #2a2d38;border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap">CONTINUATIVA</button>
+      <div class="side-card">
+        <div class="side-title">Documento</div>
+        <div class="side-actions" style="display:flex;flex-direction:column;gap:12px">
+          <div class="f"><label for="outputFormat">Formato documento unico</label>
+            <select id="outputFormat"><option value="docx">Word (.docx) — trasmissione + parere</option><option value="pdf">PDF (.pdf) — trasmissione + parere</option></select>
+          </div>
+          <label class="switch" for="reviewWord"><input type="checkbox" id="reviewWord" checked><span>Rivedi e correggi il testo nell’editor Word prima di salvare</span></label>
+          <div class="acts">
+            <button class="bgen" id="bGenDocumento" onclick="generaDocumentoUnico()">Genera documento unico</button>
+            <button class="breset" onclick="resetFormAfterGeneration()">Nuova pratica</button>
+          </div>
+          <div class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>Invio</kbd> genera · <kbd>Alt</kbd> + <kbd>N</kbd> nuova / prossima pratica</div>
         </div>
       </div>
-    </div>
-    <div class="sec" id="secMot" style="display:none"><div class="sh">Motivazione sfavorevole</div>
-      <div class="f"><textarea id="motivazione" rows="4" placeholder="Inserisci la motivazione del parere sfavorevole..."></textarea></div>
-    </div>
-    <div class="sec" id="secPres" style="display:none"><div class="sh">Prescrizioni</div>
-      <div class="f"><textarea id="prescrizioni" rows="4" placeholder="Inserisci le prescrizioni..."></textarea></div>
-    </div>
-    <div class="sec tor-box" id="secTor"><div class="sh">Prescrizioni Torronari</div>
-      <div class="tor-check"><input type="checkbox" id="torSemaforo" onchange="updateTorronariPreview()"><label for="torSemaforo" style="text-transform:none">Aggiungi anche il divieto di interferire/occultare la lanterna semaforica</label></div>
-      <div class="tor-check"><input type="checkbox" id="torTriangolo" onchange="updateTorronariPreview()"><label for="torTriangolo" style="text-transform:none">È presente un triangolo di visibilità: aggiungi la prescrizione relativa a teloni, pannelli, tende o altri elementi</label></div>
-      <div class="f" style="margin-top:12px"><label>Prescrizioni aggiuntive — una per riga</label><textarea id="torAggiuntive" rows="4" oninput="updateTorronariPreview()" placeholder="Ogni riga sarà numerata automaticamente"></textarea></div>
-      <div class="tor-preview" id="torPreview"></div>
-    </div>
-    <div class="sec"><div class="sh">Data Napoli</div>
-      <div class="g2">
-        <div class="f"><label>Data Napoli (estesa)</label><input id="dataNap" placeholder="compilata automaticamente"></div>
-        <div></div>
-      </div>
-    </div>
-    <div class="sec"><div class="sh">Agenti</div>
-      <div class="g2">
-        <div class="f"><label>Agente 1</label><select id="ag1"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
-        <div class="f"><label>Agente 2</label><select id="ag2"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
-        <div class="f"><label>Agente 3</label><select id="ag3"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
-        <div class="f"><label>Agente 4</label><select id="ag4"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
-      </div>
-    </div>
-    <div class="sec"><div class="sh">Trasmissione e firma</div>
-      <div class="g2">
-        <div class="f"><label>Estensore della nota</label>
-          <select id="estensore"><option value="A.C. Ferrara">A.C. Ferrara</option><option value="ASS Sebastiano">ASS Sebastiano</option><option value="ASS Battaglia">ASS Battaglia</option></select>
+    </aside>
+
+    <div id="form" class="area-form">
+      <div class="sec"><div class="sh"><span class="step">2</span>Tipo di parere</div>
+        <div id="tplHint" class="tpl-hint"></div>
+        <div class="tpl-grid">
+          <div class="grp-label">Attività commerciali</div>
+          <div class="tpl-bar">
+            <button type="button" class="tpl-btn" data-esito="fav" onclick="setTpl('FAV')" id="tFAV">Favorevole</button>
+            <button type="button" class="tpl-btn" data-esito="pres" onclick="setTpl('FAVP')" id="tFAVP">Con prescrizioni</button>
+            <button type="button" class="tpl-btn" data-esito="sfav" onclick="setTpl('SFAV')" id="tSFAV">Sfavorevole</button>
+          </div>
+          <div class="grp-label">Manifestazioni / eventi</div>
+          <div class="tpl-bar">
+            <button type="button" class="tpl-btn" data-esito="fav" onclick="setTpl('FAV_DEDALUS')" id="tFAV_DEDALUS">Favorevole DEDALUS</button>
+            <button type="button" class="tpl-btn" data-esito="fav" onclick="setTpl('FAV_MANIF')" id="tFAV_MANIF">Favorevole</button>
+            <button type="button" class="tpl-btn" data-esito="pres" onclick="setTpl('FAVP_MANIF')" id="tFAVP_MANIF">Con prescrizioni</button>
+            <button type="button" class="tpl-btn" data-esito="sfav" onclick="setTpl('SFAV_MANIF')" id="tSFAV_MANIF">Sfavorevole</button>
+          </div>
+          <div class="grp-label">Coldiretti / mercati</div>
+          <div class="tpl-bar">
+            <button type="button" class="tpl-btn" data-esito="fav" onclick="setTpl('COLD')" id="tCOLD">Favorevole Coldiretti</button>
+          </div>
+          <div class="grp-label">Torronari</div>
+          <div class="tpl-bar">
+            <button type="button" class="tpl-btn" data-esito="fav" onclick="setTpl('TOR_FAV')" id="tTOR_FAV">Favorevole</button>
+            <button type="button" class="tpl-btn" data-esito="sfav" onclick="setTpl('TOR_SFAV')" id="tTOR_SFAV">Sfavorevole</button>
+          </div>
         </div>
-        <div class="f"><label>Qualifica firmatario</label>
-          <select id="fqual" onchange="sincronizzaFirmatario('qualifica')"><option>Il Responsabile di Reparto</option><option>Il Vice Responsabile di Reparto</option></select>
+        <input type="hidden" id="tpl" value="FAV">
+      </div>
+
+      <div class="sec sub" id="secMot" style="display:none"><div class="sh">Motivazione del parere sfavorevole</div>
+        <div class="f"><textarea id="motivazione" rows="4" placeholder="Scrivi la motivazione o scegli un testo standard"></textarea></div>
+      </div>
+      <div class="sec sub" id="secPres" style="display:none"><div class="sh">Prescrizioni</div>
+        <div class="f"><textarea id="prescrizioni" rows="4" placeholder="Una prescrizione per riga, oppure scegli un testo standard"></textarea></div>
+      </div>
+      <div class="sec sub tor-box" id="secTor"><div class="sh">Prescrizioni Torronari</div>
+        <div class="tor-check"><input type="checkbox" id="torSemaforo" onchange="updateTorronariPreview()"><label for="torSemaforo">Aggiungi anche il divieto di interferire con la lanterna semaforica o di occultarla</label></div>
+        <div class="tor-check"><input type="checkbox" id="torTriangolo" onchange="updateTorronariPreview()"><label for="torTriangolo">È presente un triangolo di visibilità: aggiungi la prescrizione su teloni, pannelli, tende o altri elementi</label></div>
+        <div class="f" style="margin-top:12px"><label for="torAggiuntive">Prescrizioni aggiuntive — una per riga</label><textarea id="torAggiuntive" rows="3" oninput="updateTorronariPreview()" placeholder="Ogni riga sarà numerata automaticamente"></textarea></div>
+        <div class="tor-preview" id="torPreview"></div>
+      </div>
+
+      <div class="sec"><div class="sh"><span class="step">3</span>Dati della pratica</div>
+        <div class="g2">
+          <div class="f"><label class="auto" for="protocollo">Protocollo SUAP</label><input id="protocollo" placeholder="es. 1199044/2025" oninput="syncProtSuapRef()" autocomplete="off"></div>
+          <div class="f"><label class="auto" for="praticaId">Pratica ID</label><input id="praticaId" placeholder="es. MTAVLR91B54F839I-22122025-1543" autocomplete="off"></div>
+        </div>
+        <div class="g2">
+          <div class="f"><label class="auto" for="richiedente">Richiedente</label><input id="richiedente" placeholder="es. AMATO VALERIA" autocomplete="off"></div>
+          <div class="f"><label class="auto" for="ubicazione">Ubicazione</label><input id="ubicazione" placeholder="es. VIA DUOMO 168" autocomplete="off"></div>
+        </div>
+        <div class="f">
+          <label for="dataOcc">Data / periodo occupazione</label>
+          <div class="field-row">
+            <input id="dataOcc" placeholder="es. 24-25-26 LUGLIO" autocomplete="off">
+            <button type="button" class="chip" onclick="var d=document.getElementById('dataOcc');d.value='CONTINUATIVA';d.dispatchEvent(new Event('input',{bubbles:true}))">Continuativa</button>
+          </div>
         </div>
       </div>
-      <div class="g2">
-        <div class="f"><label>Nome firmatario</label>
-          <select id="fnome" onchange="sincronizzaFirmatario('nome')"><option>S.Ten Alessandro Autore</option><option>S.Ten Umberto Aliberti</option></select>
+
+      <div class="sec"><div class="sh"><span class="step">4</span>Riferimenti della risposta</div>
+        <div class="g4" style="margin-bottom:0">
+          <div class="f"><label for="pgR">PG Risposta</label><input id="pgR" placeholder="es. 322647" inputmode="numeric" autocomplete="off"></div>
+          <div class="f"><label for="annoProt">Anno</label><input id="annoProt" inputmode="numeric" maxlength="4" placeholder="aaaa"></div>
+          <div class="f"><label for="dataR">Data risposta (GG/MM/AA)</label><input id="dataR" placeholder="gg/mm/aa"></div>
+          <div class="f"><label for="dataNap">Data Napoli (estesa)</label><input id="dataNap" placeholder="compilata automaticamente"></div>
         </div>
-        <div class="f"><label>Formato documento unico</label>
-          <select id="outputFormat"><option value="docx">Word (.docx)</option><option value="pdf">PDF (.pdf)</option></select>
+      </div>
+
+      <details class="sec fold" id="foldFirma">
+        <summary class="sh">Agenti e firma <span class="fold-sum" id="sumFirma"></span></summary>
+        <div class="fold-body">
+          <div class="g2">
+            <div class="f"><label for="ag1">Agente 1</label><select id="ag1"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
+            <div class="f"><label for="ag2">Agente 2</label><select id="ag2"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
+            <div class="f"><label for="ag3">Agente 3</label><select id="ag3"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
+            <div class="f"><label for="ag4">Agente 4</label><select id="ag4"><option>--</option><option>A.C. FERRARA 3015</option><option>ASS SEBASTIANO 639S</option><option>ASS BATTAGLIA 651S</option><option>AC DI MARTINO 046S</option><option>AG. ESPOSITO 2583</option><option>AG. IAVARONE 3449</option></select></div>
+          </div>
+          <div class="g3">
+            <div class="f"><label for="estensore">Estensore della nota</label>
+              <select id="estensore"><option value="A.C. Ferrara">A.C. Ferrara</option><option value="ASS Sebastiano">ASS Sebastiano</option><option value="ASS Battaglia">ASS Battaglia</option></select>
+            </div>
+            <div class="f"><label for="fqual">Qualifica firmatario</label>
+              <select id="fqual" onchange="sincronizzaFirmatario('qualifica')"><option>Il Responsabile di Reparto</option><option>Il Vice Responsabile di Reparto</option></select>
+            </div>
+            <div class="f"><label for="fnome">Nome firmatario</label>
+              <select id="fnome" onchange="sincronizzaFirmatario('nome')"><option>S.Ten Alessandro Autore</option><option>S.Ten Umberto Aliberti</option></select>
+            </div>
+          </div>
+          <div class="f"><label for="destLettera">Destinazione lettera (automatica)</label><input id="destLettera" readonly value="Servizio SUAP — Indirizzo di protocollo 11.11.0.0.0"></div>
         </div>
-      </div>
-      <div class="review-row"><input type="checkbox" id="reviewWord" checked><label for="reviewWord" style="text-transform:none;font-size:12px;color:#cbd5e1">Rivedi e correggi il testo nell'editor Word prima di salvare</label></div>
-      <div class="f" style="margin-top:12px"><label>Destinazione lettera (automatica)</label><input id="destLettera" readonly value="Servizio SUAP — Indirizzo di protocollo 11.11.0.0.0" style="background:#1a1d24;color:#9ca3af"></div>
+      </details>
+
+      <details class="sec fold" id="foldPec">
+        <summary class="sh">Testo PEC al SUAP <span class="fold-sum">da copiare nel client PEC</span></summary>
+        <div class="fold-body">
+          <div class="g2">
+            <div class="f"><label for="pecSuap">Destinatario PEC</label><input id="pecSuap" value="suap@pec.comune.napoli.it"></div>
+            <div class="f"><label for="pecProt">Prot. SUAP (automatico)</label><input id="pecProt" readonly placeholder="Compilato dal Protocollo SUAP"></div>
+          </div>
+          <div class="f" style="margin-bottom:14px"><label for="pecSubject">Oggetto PEC</label><input id="pecSubject" placeholder="Compilato automaticamente, modificabile"></div>
+          <div class="f"><label for="pecBody">Corpo PEC</label><textarea id="pecBody" rows="10" placeholder="Premi «Genera testo PEC»"></textarea></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <button type="button" class="bman" onclick="generaTestoPec()">Genera testo PEC</button>
+            <button type="button" class="bsmall" onclick="copiaTestoPec()">Copia testo PEC</button>
+          </div>
+          <p class="hint">Il programma prepara soltanto il testo: l’invio e l’allegato restano manuali.</p>
+        </div>
+      </details>
     </div>
-    <div class="sec"><div class="sh">Testo PEC al SUAP</div>
-      <div class="g2">
-        <div class="f"><label>Destinatario PEC</label><input id="pecSuap" value="suap@pec.comune.napoli.it"></div>
-        <div class="f"><label>Prot. SUAP (automatico)</label><input id="pecProt" readonly placeholder="Compilato dal Protocollo SUAP" style="background:#1a1d24;color:#9ca3af"></div>
-      </div>
-      <div class="f" style="margin-bottom:12px"><label>Oggetto PEC</label><input id="pecSubject" placeholder="Compilato automaticamente, modificabile"></div>
-      <div class="f"><label>Corpo PEC</label><textarea id="pecBody" rows="18" placeholder="Premi Genera testo PEC"></textarea></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button type="button" class="bman" style="width:auto;flex:1;margin-top:0" onclick="generaTestoPec()">Genera testo PEC</button>
-        <button type="button" class="bsmall" onclick="copiaTestoPec()">Copia testo PEC</button>
-      </div>
-      <div style="font-size:11px;color:#6b7280;margin-top:8px">Il programma prepara soltanto il testo: l'invio e l'allegato restano manuali.</div>
-    </div>
-    <div class="acts">
-      <button class="bgen" id="bGenDocumento" onclick="generaDocumentoUnico()">Genera documento unico (Trasmissione + Parere)</button>
-      <button class="breset" onclick="resetFormAfterGeneration()">Nuova pratica</button>
-    </div>
-    <div class="kbd-hint">Scorciatoie: Ctrl+Invio genera il documento · Alt+N nuova pratica (con la coda: prossima pratica)</div>
-    <div id="pdfReadyBox" style="display:none;margin:0 0 18px;background:#0f2a1a;border:1px solid #166534;border-radius:12px;padding:14px 16px">
-      <div style="font-size:13px;font-weight:700;color:#4ade80;margin-bottom:7px">✓ DOCUMENTO PRONTO</div>
-      <div id="pdfReadyName" style="font-size:12px;color:#bbf7d0;margin-bottom:10px;word-break:break-all"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a id="pdfReadyLink" href="#" download style="display:inline-block;background:#16a34a;color:white;text-decoration:none;border-radius:9px;padding:10px 15px;font-size:13px;font-weight:700">⬇ Scarica documento</a>
-        <button type="button" id="pdfOpenBtn" style="background:#1c1f28;color:#e8eaf0;border:1px solid #374151;border-radius:9px;padding:10px 15px;font-size:13px;cursor:pointer">Apri documento</button>
-      </div>
-      <div style="font-size:11px;color:#86efac;margin-top:8px">Il collegamento resta disponibile finché non generi un nuovo documento o chiudi la pagina.</div>
-    </div>
+
   </div>
 </div>
 <script>
@@ -311,9 +483,7 @@ var TPL_LABELS = {
 
 document.getElementById('dz').onclick=function(){document.getElementById('fi').click();};
 document.getElementById('fi').onchange=function(e){handlePdfFiles(e.target.files);e.target.value='';};
-document.getElementById('dz').ondragover=function(e){e.preventDefault();this.style.borderColor='#a78bfa';};
-document.getElementById('dz').ondragleave=function(){this.style.borderColor='#2a2d38';};
-document.getElementById('dz').ondrop=function(e){e.preventDefault();this.style.borderColor='#2a2d38';handlePdfFiles(e.dataTransfer.files);};
+document.getElementById('dz').ondrop=function(e){e.preventDefault();handlePdfFiles(e.dataTransfer.files);};
 
 (function(){
   var n=new Date(),d=n.getDate().toString().padStart(2,'0'),m=(n.getMonth()+1).toString().padStart(2,'0'),y=n.getFullYear().toString().slice(-2);
@@ -329,7 +499,7 @@ function setPDF(f){
   var r=new FileReader();
   r.onload=function(){
     pdfB64=r.result.split(',')[1];
-    document.getElementById('dz').innerHTML='&#128196; <span style="color:#4ade80">'+xe(f.name)+'</span> caricato';
+    dzFile(f.name);
   };
   r.readAsDataURL(f);
 }
@@ -799,7 +969,7 @@ function resetFormAfterGeneration(){
     if(letteraOn){ letteraOn=false; var tog=document.getElementById('togL'),knob=document.getElementById('knobL'),sec=document.getElementById('letteraSec'); if(tog)tog.style.background='#2a2d38'; if(knob){knob.style.background='#6b7280';knob.style.left='3px';} if(sec)sec.style.display='none'; }
     var aiBox=document.getElementById('aiBox'); if(aiBox) aiBox.style.display='none';
     pdfB64=null; pdfFile=null; aiSugg=null;
-    var dz=document.getElementById('dz'); if(dz)dz.innerHTML='&#128196; Trascina qui il PDF oppure clicca per selezionarlo<br><span style="font-size:11px;color:#64748b">Puoi trascinarne anche molti insieme: si crea la coda delle pratiche</span>';
+    if(typeof dzIdle==='function')dzIdle();
     clearDraft();
     syncProtSuapRef();
     window.scrollTo({top:0,behavior:'smooth'});
@@ -807,7 +977,7 @@ function resetFormAfterGeneration(){
 }
 
 // ===== Migliorie operative v2.1 =====
-var APP_VERSION='7.1 - coda pratiche, Word unico, testi standard, registro, OCR';
+var APP_VERSION='8.0 - nuova interfaccia a due colonne';
 var MAX_FILE_MB=12;
 function protocolYear(){var e=document.getElementById('annoProt');return e&&/^\d{4}$/.test(e.value)?e.value:String(new Date().getFullYear());}
 function formatDateExt(d){var m=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];return d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();}
@@ -1155,7 +1325,7 @@ function _publishPdfBlob(blob,filename){
   if(link){link.href=_lastPdfUrl;link.download=filename;}
   if(name){name.textContent=filename;name.dataset.bytes=String(blob&&blob.size||0);name.dataset.mime=String(blob&&blob.type||'');}
   if(openBtn)openBtn.onclick=function(){window.open(_lastPdfUrl,'_blank','noopener');};
-  if(box){box.style.display='block';box.scrollIntoView({behavior:'smooth',block:'center'});}
+  if(box){box.style.display='block';box.scrollIntoView({behavior:'smooth',block:'nearest'});}
   return _lastPdfUrl;
 }
 
@@ -1183,7 +1353,8 @@ async function _renderDocxPairToPdf(letterBlob,parereBlob,filename){
 
   var host=document.createElement('div');
   host.id='docxPdfRenderHost';
-  host.style.cssText='position:absolute;left:0;top:0;width:820px;background:#fff;z-index:2147483000;padding:0;margin:0;color:#000;';
+  // Testo base fisso: il PDF non deve cambiare se cambia lo stile della maschera.
+  host.style.cssText='position:absolute;left:0;top:0;width:820px;background:#fff;z-index:2147483000;padding:0;margin:0;color:#000;font-size:16px;line-height:1.45;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;letter-spacing:normal;';
   var l=document.createElement('div'), p=document.createElement('div');
   l.className='pdf-doc-part letter-part';
   p.className='pdf-doc-part parere-part';
@@ -1788,7 +1959,7 @@ function openQueueItem(id){
   var q=_queueItem(id);if(!q||q.status==='attesa'||q.status==='lettura')return;
   resetFormAfterGeneration();
   QUEUE_CURRENT=id;pdfFile=q.file;
-  var dz=document.getElementById('dz');if(dz)dz.innerHTML='&#128196; <span style="color:#4ade80">'+xe(q.file.name)+'</span> — pratica '+(QUEUE.indexOf(q)+1)+' di '+QUEUE.length;
+  dzFile(q.file.name,'Pratica '+(QUEUE.indexOf(q)+1)+' di '+QUEUE.length+' della coda');
   if(q.r)_practiceMessage(q.r,_applyPractice(q.r));
   else mostraMsg('E',(q.err||'Dati non letti')+' — compila i campi a mano.');
   renderQueue();
@@ -1816,9 +1987,9 @@ function onPracticeGenerated(){
   var left=QUEUE.filter(function(x){return x.status!=='fatta'&&x.status!=='saltata';}).length;
   if(box&&!nb){
     nb=document.createElement('button');nb.type='button';nb.id='queueNextBtn';
-    nb.style.cssText='background:#2563eb;color:#fff;border:0;border-radius:9px;padding:10px 15px;font-size:13px;font-weight:700;cursor:pointer';
+    
     nb.onclick=nextQueueItem;
-    var row=box.querySelector('div[style*="flex"]');(row||box).appendChild(nb);
+    var row=box.querySelector('.ready-actions');(row||box).appendChild(nb);
   }
   if(nb){nb.style.display=left?'inline-block':'none';nb.textContent='Prossima pratica ('+left+') →';}
 }
@@ -1959,7 +2130,7 @@ function initV71(){
   if(up&&!document.getElementById('queueSec')){
     var sec=document.createElement('div');sec.className='sec';sec.id='queueSec';sec.style.display='none';
     sec.innerHTML='<div class="sh" id="queueTitle">Coda pratiche</div><div class="q-prog"><div id="queueBar"></div></div><div id="queueList"></div>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="bsmall" onclick="nextQueueItem()">Prossima da lavorare →</button><button type="button" class="bsmall" onclick="document.getElementById(\'fi\').click()">Aggiungi PDF</button><button type="button" class="bsmall" onclick="clearQueue()">Svuota coda</button></div>';
+      '<div class="q-tools"><button type="button" class="bsmall" onclick="nextQueueItem()">Prossima da lavorare →</button><button type="button" class="bsmall" onclick="document.getElementById(\'fi\').click()">Aggiungi PDF</button><button type="button" class="bsmall" onclick="clearQueue()">Svuota coda</button></div>';
     up.insertAdjacentElement('afterend',sec);
   }
   renderLibraries();
@@ -1969,6 +2140,98 @@ function initV71(){
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape')closeRegistry();});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initV71);else initV71();
+</script>
+<script>
+// ===== v8.0: interfaccia a due colonne, checklist "pronto per generare", sezioni richiudibili =====
+var DZ_ICON='<div class="drop-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg></div>';
+function dzIdle(){var dz=document.getElementById('dz');if(dz)dz.innerHTML=DZ_ICON+'<div class="drop-t">Trascina qui il PDF o <u>sfoglia</u></div><div class="drop-s">Anche più file insieme: si crea la coda delle pratiche</div>';}
+function dzFile(name,note){var dz=document.getElementById('dz');if(dz)dz.innerHTML=DZ_ICON+'<div class="drop-t"><b>'+xe(name)+'</b></div><div class="drop-s">'+xe(note||'Caricato · trascina un altro PDF per sostituirlo')+'</div>';}
+
+// Impostazioni d'ufficio che restano uguali da una pratica all'altra.
+var OFFICE_FIELDS=['ag1','ag2','ag3','ag4','estensore','fqual','fnome','outputFormat'];
+
+function _tplNeeds(tpl){return {mot:tpl==='SFAV'||tpl==='TOR_SFAV'||tpl==='SFAV_MANIF',pres:tpl==='FAVP'||tpl==='FAVP_MANIF'};}
+function _agentsList(){return ['ag1','ag2','ag3','ag4'].map(_v).filter(function(x){return x&&x!=='--';});}
+function _focusField(id){
+  var el=document.getElementById(id);if(!el)return;
+  var fold=el.closest('details');if(fold&&!fold.open){fold.open=true;fold.dispatchEvent(new Event('toggle'));}
+  el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){el.focus();},250);
+}
+function updateReadiness(){
+  var list=document.getElementById('readyList');if(!list)return;
+  var tpl=_v('tpl')||'FAV',need=_tplNeeds(tpl),items=[];
+  var pg=_v('pgR').replace(/^PG\/\d{4}\//i,'');
+  items.push({id:'pgR',label:'PG risposta',state:pg?'ok':'ko',note:pg?'PG/'+protocolYear()+'/'+pg:'mancante'});
+  items.push({id:'tFAV',label:'Tipo di parere',state:'ok',note:TPL_LABELS[tpl]||tpl});
+  if(need.mot)items.push({id:'motivazione',label:'Motivazione',state:_v('motivazione')?'ok':'ko',note:_v('motivazione')?'scritta':'obbligatoria per lo sfavorevole'});
+  if(need.pres)items.push({id:'prescrizioni',label:'Prescrizioni',state:_v('prescrizioni')?'ok':'ko',note:_v('prescrizioni')?'scritte':'obbligatorie'});
+  var ags=_agentsList();
+  items.push({id:'ag1',label:'Agenti',state:ags.length?'ok':'warn',note:ags.length?ags.join(', '):'nessuno selezionato'});
+  list.innerHTML='';
+  items.forEach(function(it){
+    var b=document.createElement('button');b.type='button';b.className='ready-item '+it.state;
+    b.innerHTML='<b>'+(it.state==='ok'?'✓':it.state==='warn'?'!':'✗')+'</b>'+escapeHtml(it.label)+'<small>'+escapeHtml(it.note)+'</small>';
+    b.onclick=function(){_focusField(it.id);};
+    list.appendChild(b);
+  });
+  var all=Array.from(document.querySelectorAll('#essentials .ess,#readyList .ready-item'));
+  var blocking=all.filter(function(x){return x.classList.contains('ko')||(x.classList.contains('warn')&&x.parentNode.id==='essentials');}).length;
+  var score=document.getElementById('readyScore');
+  if(score){score.textContent=blocking?blocking+' da completare':'Tutto pronto';score.className='score'+(blocking?'':' ok');}
+  var sum=document.getElementById('sumFirma');
+  if(sum)sum.textContent=(ags.length?ags.join(', '):'nessun agente')+' · estensore '+_v('estensore')+' · '+_firmatarioSelezionato().nome;
+}
+
+// Messaggi come avviso flottante: le conferme si chiudono da sole, gli errori restano finché non li chiudi.
+var _msgTimer=null;
+function _wrapMsg(){
+  var base=window.mostraMsg;
+  window.mostraMsg=function(t,txt){
+    base(t,txt);
+    var el=document.getElementById('msg');if(!el)return;
+    clearTimeout(_msgTimer);
+    if(t!=='L'){var x=document.createElement('button');x.type='button';x.className='msg-x';x.setAttribute('aria-label','Chiudi');x.textContent='×';x.onclick=function(){el.style.display='none';};el.appendChild(x);}
+    if(t==='O')_msgTimer=setTimeout(function(){el.style.display='none';},6000);
+  };
+}
+function initV8(){
+  _wrapMsg();
+  dzIdle();
+  var dz=document.getElementById('dz');
+  if(dz){
+    dz.ondragover=function(e){e.preventDefault();dz.classList.add('over');};
+    dz.ondragleave=function(){dz.classList.remove('over');};
+    dz.addEventListener('drop',function(){dz.classList.remove('over');});
+    dz.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('fi').click();}});
+  }
+  var anno=document.getElementById('annoProt');if(anno&&!/^\d{4}$/.test(anno.value))anno.value=String(new Date().getFullYear());
+  // Le sezioni richiudibili ricordano se le hai lasciate aperte.
+  document.querySelectorAll('details.fold').forEach(function(d){
+    try{var st=localStorage.getItem('amm20_suolo_fold_'+d.id);if(st!==null)d.open=st==='1';}catch(e){}
+    d.addEventListener('toggle',function(){try{localStorage.setItem('amm20_suolo_fold_'+d.id,d.open?'1':'0');}catch(e){}});
+  });
+  // Checklist sempre aggiornata.
+  var origEss=window.updateEssentialsBar;
+  window.updateEssentialsBar=function(){origEss();updateReadiness();};
+  var origTpl=window.setTpl;
+  window.setTpl=function(v){origTpl(v);updateReadiness();};
+  ['pgR','annoProt','motivazione','prescrizioni'].forEach(function(id){var e=document.getElementById(id);if(e)e.addEventListener('input',updateReadiness);});
+  ['ag1','ag2','ag3','ag4','estensore','fqual','fnome'].forEach(function(id){var e=document.getElementById(id);if(e)e.addEventListener('change',updateReadiness);});
+  // "Nuova pratica" svuota i dati della pratica, non agenti, firma e formato.
+  var origReset=window.resetFormAfterGeneration;
+  window.resetFormAfterGeneration=function(){
+    var keep={};OFFICE_FIELDS.forEach(function(id){keep[id]=_v(id);});
+    var anno=_v('annoProt');
+    origReset();
+    OFFICE_FIELDS.forEach(function(id){var e=document.getElementById(id);if(e&&keep[id])e.value=keep[id];});
+    var a=document.getElementById('annoProt');if(a&&/^\d{4}$/.test(anno))a.value=anno;
+    if(typeof saveDraft==='function')saveDraft(false);
+    dzIdle();updateReadiness();
+  };
+  setTpl(_v('tpl')||'FAV');
+  updateEssentialsBar();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initV8);else initV8();
 </script>
 </body>
 </html>
